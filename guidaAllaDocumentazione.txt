@@ -1,0 +1,25 @@
+Per una libreria, ogni funzione pubblica dovrebbe documentare sempre queste cose:
+
+        Scopo
+        cosa fa la funzione
+        Precondizioni
+        cosa deve essere valido prima della chiamata
+        esempio: stack non deve essere NULL
+        Parametri
+        significato di ogni parametro
+        se può essere NULL
+        se viene modificato
+        Valore di ritorno
+        cosa significa 0
+        cosa significa 1
+        eventuali codici errore
+        Effetti collaterali
+        alloca memoria?
+        libera memoria?
+        modifica la struttura?
+        copia il dato o salva solo il puntatore?
+        Ownership
+        chi possiede la memoria del dato inserito?
+        la stack libera i dati oppure no?
+
+        Questo punto è fondamentale. In C è una delle cose più importanti da documentare.
