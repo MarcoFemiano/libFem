@@ -5,6 +5,13 @@
 #ifndef LIBFEM_STACK_H
 #define LIBFEM_STACK_H
 
+/*
+    * Stack.h
+    * Questo è il file che contiene la mia implementazione di stack
+    *  */
+
+
+
 typedef struct strStack* Stack;
 
 
