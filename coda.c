@@ -89,23 +89,29 @@ short coda_push(Coda coda, const void* datoInput) {
       long long int oldCapacity = coda->capacity;
       unsigned char* datiTemp = malloc(coda->sizeOfEachElement * coda->capacity*2);
       if (datiTemp == NULL) return ERROR_REALLOC_FAIL;
-      coda->capacity *=2;
 
 
+      //CHAT GPT MI HA CONSIGLIATO DI USARE QUESTA VARIABILE
+      //INVECE DI USARE DIRETTAMENTE coda->head PERCHè
+      //SE UN INDOMANI DOVESSI FARE DEL DEBUG, LAVORARE CON coda->head
+      //DIRETTAMENTE NEL FOR, ROMPEREBBE IL DEBUG O GENEREREBBE STATI INCOERENTI
+      //MI SEMBRA RAGIONEVOLE E SEGUO IL CONSIGLIO
+      long long int headTemp = coda->head;
 
        for (long long int i = 0; i < coda->size; i++) {
 
         memcpy(
           (unsigned char*)datiTemp + (i * coda->sizeOfEachElement),
-          (unsigned char*)coda->dati + (coda->head  * coda->sizeOfEachElement),
+          (unsigned char*)coda->dati + (headTemp  * coda->sizeOfEachElement),
           coda->sizeOfEachElement);
-         coda->head = (long long) (coda->head +1) % oldCapacity;
+         headTemp = (long long) (headTemp +1) % oldCapacity;
        }
 
       free(coda->dati);
       coda->dati = datiTemp;
       coda->tail = coda->size;
       coda->head = 0;
+      coda->capacity *=2;
 
     }
 
