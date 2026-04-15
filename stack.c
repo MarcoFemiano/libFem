@@ -16,6 +16,8 @@
 #include <string.h>
 #include <stdint.h>
 
+
+
 /**
  * @brief Struttura concreta privata dello stack.
  *
@@ -37,12 +39,12 @@ struct strStack {
     /**
      * @brief Numero di elementi attualmente presenti nello stack.
      */
-    long long int size;
+    size_t size;
 
     /**
      * @brief Capacità corrente dello stack espressa in numero di elementi.
      */
-    long long int capacity;
+    size_t capacity;
 
     /**
      * @brief Modalità dello stack.
@@ -55,16 +57,16 @@ struct strStack {
     /**
      * @brief Dimensione, in byte, di ogni elemento memorizzato.
      */
-    unsigned int sizeOfEachElement;
+    size_t sizeOfEachElement;
 };
 
 
 
 
-Stack stack_create( long long int capacity, unsigned int sizeOfEachElement) {
+Stack stack_create( size_t capacity, size_t sizeOfEachElement) {
 
     //test di robustezza
-    if (sizeOfEachElement == 0 || capacity < 0) return NULL;
+    if (sizeOfEachElement == 0) return NULL;
 
     Stack stack = malloc(sizeof (struct strStack));
     //test di robustezza
@@ -94,9 +96,14 @@ Stack stack_create( long long int capacity, unsigned int sizeOfEachElement) {
     }
     //Se capacity è 0 voglio uno stack a dimensione dinamica potenzialmente illimitato
     else if (stack->capacity == 0) {
-        //inizializzo con 10 elementi
-        stack->dati = malloc(10 * sizeOfEachElement);
-        stack->capacity = 10;
+        //test di robustezza
+        if (sizeOfEachElement > SIZE_MAX / DEFAULT_SIZE) {
+            free(stack);
+            return NULL;
+        }
+        //inizializzo con DEFAULT_SIZE elementi
+        stack->dati = malloc(DEFAULT_SIZE * sizeOfEachElement);
+        stack->capacity = DEFAULT_SIZE;
 
         if (stack->dati == NULL) {
             free(stack);
@@ -116,9 +123,9 @@ void stack_destroy(Stack* stack) {
     //test di robustezza
     if (stack == NULL || *stack == NULL) return;
 
-        free((*stack)->dati);
-        free(*stack);
-        *stack = NULL;
+    free((*stack)->dati);
+    free(*stack);
+    *stack = NULL;
 
 }
 
@@ -133,7 +140,7 @@ short stack_push(Stack stack,const void* datoInput) {
         //se ho raggiunto la massimo capienza, allargo geometricamente
         if (stack->size >= stack->capacity) {
             //test di robustezza per overflow aritmetico
-            if (stack->capacity > SIZE_MAX / 2 / stack->sizeOfEachElement) return ERROR_REALLOC_FAIL;
+            if (stack->capacity > SIZE_MAX / 2 / stack->sizeOfEachElement) return ERROR_ARITHMETIC_OVERFLOW;
 
             void *temp = realloc(stack->dati, (stack->capacity*2) * stack->sizeOfEachElement);
 
@@ -187,9 +194,9 @@ short stack_peek(Stack stack, void* datoOutput) {
 }
 
 
-long long int stack_size(Stack stack) {
+size_t stack_size(Stack stack) {
     //test di robustezza
-    if (stack == NULL) return ERROR_NULL_POINTER;
+    if (stack == NULL) return 0;
 
     return stack->size;
 }
@@ -204,8 +211,31 @@ short stack_is_empty(Stack stack) {
 short stack_is_full(Stack stack) {
     if (stack == NULL) return ERROR_NULL_POINTER;
 
-    if (stack->dinamico) return 0;
+    if (stack->dinamico) return ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE;
 
     return (short) (stack->size == stack->capacity);
 }
 
+short stack_clear_and_resize_to_default(Stack stack) {
+    if (stack == NULL) return ERROR_NULL_POINTER;
+    if (!stack->dinamico) return ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE;
+
+    if (stack->sizeOfEachElement > SIZE_MAX / DEFAULT_SIZE) return ERROR_ARITHMETIC_OVERFLOW;
+    void* temp = realloc(stack->dati, DEFAULT_SIZE * stack->sizeOfEachElement);
+
+    if (temp == NULL) return ERROR_REALLOC_FAIL;
+    stack->dati = temp;
+    stack->capacity = DEFAULT_SIZE;
+
+    stack->size = 0;
+
+    return OK;
+}
+
+
+short stack_clear(Stack stack) {
+    if (stack == NULL) return ERROR_NULL_POINTER;
+
+    stack->size = 0;
+    return OK;
+}

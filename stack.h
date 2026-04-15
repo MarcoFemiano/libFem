@@ -4,6 +4,7 @@
 
 #ifndef LIBFEM_STACK_H
 #define LIBFEM_STACK_H
+#include <stddef.h>
 
 /**
  * @file stack.h
@@ -74,6 +75,17 @@ typedef struct strStack* Stack;
 #define ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE (-6)
 
 /**
+ * @brief Errore: fallimento di realloc() o impossibilità di espansione.
+ */
+#define ERROR_ARITHMETIC_OVERFLOW (-7)
+
+/**
+ * @brief Dimensione fisica di partenza nel caso venga selezionato uno stack dinamico
+ */
+#define DEFAULT_SIZE 10
+
+
+/**
  * @brief Crea e inizializza un nuovo stack generico.
  *
  * Lo stack memorizza elementi tutti della stessa dimensione, espressa in byte
@@ -104,7 +116,7 @@ typedef struct strStack* Stack;
  * @note Lo stack esegue una copia raw dei dati tramite memcpy().
  * @see stack_push(), stack_destroy()
  */
-Stack stack_create(long long int capacity, unsigned int sizeOfEachElement);
+Stack stack_create(size_t capacity, size_t sizeOfEachElement);
 
 /**
  * @brief Distrugge uno stack e libera tutta la memoria associata.
@@ -205,7 +217,7 @@ short stack_peek(Stack stack, void* datoOutput);
  *
  * @note Il valore restituito è la dimensione logica dello stack, non la capacità.
  */
-long long int stack_size(Stack stack);
+size_t stack_size(Stack stack);
 
 /**
  * @brief Verifica se lo stack è vuoto.
@@ -235,4 +247,38 @@ short stack_is_empty(Stack stack);
  */
 short stack_is_full(Stack stack);
 
+
+/**
+ * @brief Svuota logicamente e fisicamente lo stack impostando la capacità a DEFAULT_SIZE
+ *  lo stack SOLO se dinamico.
+ *
+ *  @warning Se lo stack contiene elementi allocati dinamicamente
+ * è responsabilità dell'utilizzatore liberare la memoria
+ *
+ * @param stack Stack da modificare
+ *
+ * @retval ERROR_NULL_POINTER puntatore allo stack nullo
+ * @retval OK funzione eseguita con successo
+ * @retval ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE se la funzione viene chiamata ma si sta lavorando con uno stack statico
+ * @retval ERROR_ARITHMETIC_OVERFLOW  overflow aritmetico sulla capacità
+ * @retval ERROR_REALLOC_FAIL se fallisce la realloc
+ *
+ *
+ */
+short stack_clear_and_resize_to_default(Stack stack);
+
+/**
+* @brief Svuota logicamente lo stack impostando la dimensione a 0.
+ *
+ * Non modifica la capacità fisica del buffer interno.
+ *
+ * @warning Se lo stack contiene elementi allocati dinamicamente
+ * è responsabilità dell'utilizzatore liberare la memoria
+ *
+ * @param stack Stack da modificare
+ *
+ * @retval ERROR_NULL_POINTER puntatore allo stack nullo
+ *
+ */
+short stack_clear(Stack stack);
 #endif //LIBFEM_STACK_H
