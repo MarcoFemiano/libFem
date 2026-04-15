@@ -7,4 +7,7 @@ include_directories(.)
 
 add_executable(libFem
         stack.c
-        stack.h)
+        stack.h
+        main.c
+        coda.c
+        coda.h)
