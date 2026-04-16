@@ -65,9 +65,8 @@ static short parcheggio_inserisci_in_coda(Parcheggio parcheggio, int automobile)
  *
  * @param parcheggio Parcheggio su cui operare.
  *
- * @note La firma attuale usa un parametro per valore. Questo significa che
- *       il chiamante non riceve il valore estratto. Se vuoi restituire davvero
- *       l'auto rimossa, conviene usare `int *automobile`.
+ * @note  Il valore rimosso viene scartato intenzionalmente, poiché non serve
+ * al chiamante.
  *
  * @retval ERROR_NULL_POINTER puntatore nullo.
  * @retval qualsiasi codice restituito da coda_pop.
@@ -101,8 +100,8 @@ static short parcheggio_inserisci_in_spazioManovra(Parcheggio parcheggio, int au
  *
  * @param parcheggio Parcheggio su cui operare.
  *
- * @note Anche qui, se vuoi propagare davvero al chiamante il valore rimosso,
- *       conviene usare `int *automobileRimossa`.
+ * @note  Il valore rimosso viene scartato intenzionalmente, poiché non serve
+ * al chiamante.
  *
  * @retval ERROR_NULL_POINTER puntatore nullo.
  * @retval qualsiasi codice restituito da stack_pop.
@@ -136,8 +135,8 @@ static short parcheggia_auto(Parcheggio parcheggio, int automobile) {
  *
  * @param parcheggio Parcheggio su cui operare.
  *
- * @note Come per altre funzioni private analoghe, se vuoi restituire davvero
- *       il valore al chiamante è preferibile usare un puntatore a int.
+ * @note  Il valore rimosso viene scartato intenzionalmente, poiché non serve
+ * al chiamante.
  *
  * @retval ERROR_NULL_POINTER puntatore nullo.
  * @retval qualsiasi codice restituito da stack_pop.
