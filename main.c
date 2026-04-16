@@ -48,30 +48,7 @@
 
 int main(void) {
 
-    Stack parcheggio = NULL;
-    Coda coda;
-    Stack spazioManovra;
 
-    parcheggio = stack_create(10,sizeof(int));
-    //test di robustezza
-    if (parcheggio == NULL) {
-        printf("Errore nella creazione dello stack del parcheggio\n");
-        return -1;
-    }
-
-    coda = coda_create(0,sizeof(int));
-    //test di robustezza
-    if (coda == NULL) {
-        printf("Errore nella creazione del coda\n");
-        return -1;
-    }
-
-    spazioManovra = stack_create(4,sizeof(int));
-    //test di robustezza
-    if (spazioManovra == NULL) {
-        printf("Errore nella creazione dello spazio di manovra");
-        return -1;
-    }
 
 
 
