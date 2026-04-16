@@ -21,9 +21,9 @@ typedef struct strParking* Parcheggio;
  *
  */
 Parcheggio parcheggio_create();
-Parcheggio parcheggio_autoArriva(Parcheggio parcheggio, int automobile);
-Parcheggio parcheggio_autoEsce(Parcheggio parcheggio, int automobile);
-Parcheggio parcheggio_auto_esce_da_coda_di_attesa(Parcheggio parcheggio, int automobile);
+short parcheggio_autoArriva(Parcheggio parcheggio, int automobile);
+short parcheggio_autoEsce(Parcheggio parcheggio, int automobile);
+short parcheggio_auto_esce_da_coda_di_attesa(Parcheggio parcheggio, int automobile);
 void parcheggio_destroy(Parcheggio *parcheggio);
 
 
@@ -31,13 +31,13 @@ void parcheggio_destroy(Parcheggio *parcheggio);
 
 
 static short parcheggia_auto(Parcheggio parcheggio, Stack areaParcheggio, int automobile);
-static short parcheggio_rimuovi_parcheggiata(Parcheggio parcheggio, Stack areaParcheggio, Stack spazioManovra, int* automobileRimossa);
+static short parcheggio_rimuovi_parcheggiata(Parcheggio parcheggio, Stack areaParcheggio, Stack spazioManovra, int automobileRimossa);
 
 static short parcheggio_inserisci_in_coda(Parcheggio parcheggio, Coda codaVeicoli, int automobile);
 static short parcheggio_rimuovi_da_coda(Parcheggio parcheggio, Coda codaVeicoli, int automobile);
 
 static short parcheggio_inserisci_in_spazioManovra(Parcheggio parcheggio, Stack areaParcheggio, Stack spazioManovra, int automobile);
-static short parcheggio_rimuovi_da_spazioManovra(Parcheggio parcheggio, Stack areaParcheggio, int* automobileRimossa);
+static short parcheggio_rimuovi_da_spazioManovra(Parcheggio parcheggio, Stack areaParcheggio, int automobileRimossa);
 
 
 #endif //LIBFEM_PARKING_H
