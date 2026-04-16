@@ -8,6 +8,9 @@ include_directories(.)
 add_executable(libFem
         stack.c
         stack.h
-        main.c
+        esercizioValidatoreParentesi.c
         coda.c
-        coda.h)
+        coda.h
+        main.c
+        parking.c
+        parking.h)
