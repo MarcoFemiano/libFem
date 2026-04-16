@@ -64,7 +64,6 @@ static short parcheggio_inserisci_in_coda(Parcheggio parcheggio, int automobile)
  * @brief Rimuove un'automobile dalla coda di attesa.
  *
  * @param parcheggio Parcheggio su cui operare.
- * @param automobile Variabile locale di appoggio che riceve il valore estratto.
  *
  * @note La firma attuale usa un parametro per valore. Questo significa che
  *       il chiamante non riceve il valore estratto. Se vuoi restituire davvero
@@ -88,6 +87,7 @@ static short parcheggio_rimuovi_da_coda(Parcheggio parcheggio) {
  * @param automobile Identificativo dell'automobile da inserire.
  *
  * @retval ERROR_NULL_POINTER puntatore nullo.
+ * @retval qualsiasi codice restituito da stack_push.
  */
 static short parcheggio_inserisci_in_spazioManovra(Parcheggio parcheggio, int automobile) {
     // test di robustezza
@@ -100,12 +100,12 @@ static short parcheggio_inserisci_in_spazioManovra(Parcheggio parcheggio, int au
  * @brief Rimuove un'automobile dallo spazio di manovra.
  *
  * @param parcheggio Parcheggio su cui operare.
- * @param automobileRimossa Variabile locale di appoggio che riceve il valore estratto.
  *
  * @note Anche qui, se vuoi propagare davvero al chiamante il valore rimosso,
  *       conviene usare `int *automobileRimossa`.
  *
  * @retval ERROR_NULL_POINTER puntatore nullo.
+ * @retval qualsiasi codice restituito da stack_pop.
  */
 static short parcheggio_rimuovi_da_spazioManovra(Parcheggio parcheggio) {
     // test di robustezza
@@ -135,12 +135,12 @@ static short parcheggia_auto(Parcheggio parcheggio, int automobile) {
  * @brief Rimuove l'automobile attualmente in cima all'area di parcheggio.
  *
  * @param parcheggio Parcheggio su cui operare.
- * @param automobileRimossa Variabile locale di appoggio che riceve il valore estratto.
  *
  * @note Come per altre funzioni private analoghe, se vuoi restituire davvero
  *       il valore al chiamante è preferibile usare un puntatore a int.
  *
  * @retval ERROR_NULL_POINTER puntatore nullo.
+ * @retval qualsiasi codice restituito da stack_pop.
  */
 static short parcheggio_rimuovi_parcheggiata(Parcheggio parcheggio) {
     // test di robustezza
