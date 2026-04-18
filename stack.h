@@ -6,6 +6,9 @@
 #define LIBFEM_STACK_H
 #include <stddef.h>
 
+typedef char bool;
+#define true 1
+#define false 0
 /**
  * @file stack.h
  * @brief Interfaccia pubblica per un ADT Stack generico a memoria contigua.

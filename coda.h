@@ -7,6 +7,9 @@
 
 #include <stddef.h>
 
+typedef char bool;
+#define true 1
+#define false 0
 /**
  * @file coda.h
  * @brief Interfaccia pubblica per un ADT Coda generico a memoria contigua.
@@ -129,7 +132,7 @@ typedef struct strCoda* Coda;
  * @return Puntatore alla coda appena creata in caso di successo.
  * @return NULL in caso di parametri non validi o fallimento di allocazione.
  */
-Coda coda_create(long long int capacity, size_t sizeOfEachElement);
+Coda coda_create(size_t capacity, size_t sizeOfEachElement);
 
 /**
  * @brief Distrugge una coda e libera tutta la memoria associata.

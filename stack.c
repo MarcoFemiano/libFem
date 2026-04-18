@@ -52,7 +52,7 @@ struct strStack {
      * - 0: stack a capacità fissa
      * - 1: stack dinamico
      */
-    char dinamico;
+    bool dinamico;
 
     /**
      * @brief Dimensione, in byte, di ogni elemento memorizzato.
@@ -92,7 +92,7 @@ Stack stack_create( size_t capacity, size_t sizeOfEachElement) {
             return NULL;
         }
 
-        stack -> dinamico = 0;
+        stack->dinamico = false;
     }
     //Se capacity è 0 voglio uno stack a dimensione dinamica potenzialmente illimitato
     else if (stack->capacity == 0) {
@@ -110,7 +110,7 @@ Stack stack_create( size_t capacity, size_t sizeOfEachElement) {
             return NULL;
         }
 
-        stack -> dinamico = 1;
+        stack -> dinamico = true;
     }
 
 

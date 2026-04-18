@@ -8,20 +8,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 struct strCoda {
   unsigned char* dati;
-  long long int size;
-  long long int capacity;
+  size_t  size;
+  size_t capacity;
   size_t sizeOfEachElement;
-  long long int head;
-  long long int tail;
-  char dinamica; //0 per statica, 1 per dinamica
+  size_t head;
+  size_t tail;
+  bool dinamica;
 };
 
-Coda coda_create(long long int capacity, size_t sizeOfEachElement) {
+Coda coda_create(size_t capacity, size_t sizeOfEachElement) {
 
   //tests di robustezza
-  if (capacity < 0 || sizeOfEachElement == 0 ) return NULL;
+  if (sizeOfEachElement == 0 ) return NULL;
   if (capacity == 0 && DEFAULT_SIZE == 0) return NULL;
 
   Coda coda = malloc(sizeof(struct strCoda));
@@ -39,7 +40,7 @@ Coda coda_create(long long int capacity, size_t sizeOfEachElement) {
   coda->sizeOfEachElement = sizeOfEachElement;
 
   //test di robustezza
-  if ((size_t)coda->capacity > SIZE_MAX/sizeOfEachElement) {
+  if (coda->capacity > SIZE_MAX/sizeOfEachElement) {
     free (coda);
     return NULL;
   }
@@ -82,29 +83,21 @@ short coda_push(Coda coda, const void* datoInput) {
 
     if (coda->size == coda->capacity) {
 
-      if ((size_t)coda->capacity > SIZE_MAX / 2 / coda->sizeOfEachElement) return ERROR_REALLOC_FAIL;
+      if (coda->capacity > SIZE_MAX / 2 / coda->sizeOfEachElement) return ERROR_REALLOC_FAIL;
 
-
-
-      long long int oldCapacity = coda->capacity;
+      size_t oldCapacity = coda->capacity;
       unsigned char* datiTemp = malloc(coda->sizeOfEachElement * coda->capacity*2);
       if (datiTemp == NULL) return ERROR_REALLOC_FAIL;
 
+      size_t headTemp = coda->head;
 
-      //CHAT GPT MI HA CONSIGLIATO DI USARE QUESTA VARIABILE
-      //INVECE DI USARE DIRETTAMENTE coda->head PERCHè
-      //SE UN INDOMANI DOVESSI FARE DEL DEBUG, LAVORARE CON coda->head
-      //DIRETTAMENTE NEL FOR, ROMPEREBBE IL DEBUG O GENEREREBBE STATI INCOERENTI
-      //MI SEMBRA RAGIONEVOLE E SEGUO IL CONSIGLIO
-      long long int headTemp = coda->head;
-
-       for (long long int i = 0; i < coda->size; i++) {
+       for (size_t i = 0; i < coda->size; i++) {
 
         memcpy(
-          (unsigned char*)datiTemp + (i * coda->sizeOfEachElement),
-          (unsigned char*)coda->dati + (headTemp  * coda->sizeOfEachElement),
+          datiTemp + (i * coda->sizeOfEachElement),
+          coda->dati + (headTemp  * coda->sizeOfEachElement),
           coda->sizeOfEachElement);
-         headTemp = (long long) (headTemp +1) % oldCapacity;
+         headTemp =  (headTemp +1) % oldCapacity;
        }
 
       free(coda->dati);
@@ -125,7 +118,7 @@ short coda_push(Coda coda, const void* datoInput) {
 
   memcpy((unsigned char*)coda->dati + (coda->sizeOfEachElement * coda->tail),datoInput,coda->sizeOfEachElement);
   coda->size++;
-  coda->tail = (long long)(coda->tail + 1) % coda->capacity;
+  coda->tail = (coda->tail + 1) % coda->capacity;
   return OK;
 
 
@@ -140,11 +133,11 @@ short coda_pop(Coda coda, void* datoOutput) {
 
   memcpy(
     datoOutput,
-    (unsigned char*)coda->dati + (coda->head  * coda->sizeOfEachElement),
+    coda->dati + (coda->head  * coda->sizeOfEachElement),
     coda->sizeOfEachElement
     );
 
-  coda->head = (long long)(coda->head + 1) % coda->capacity;
+  coda->head = (coda->head + 1) % coda->capacity;
   coda->size--;
 
   return OK;
@@ -160,7 +153,7 @@ short coda_peek(Coda coda, void* datoOutput) {
 
   memcpy(
     datoOutput,
-    (unsigned char*)coda->dati + (coda->head  * coda->sizeOfEachElement),
+    coda->dati + (coda->head  * coda->sizeOfEachElement),
     coda->sizeOfEachElement
     );
 
@@ -170,7 +163,7 @@ short coda_peek(Coda coda, void* datoOutput) {
 long long int coda_size(Coda coda) {
   if (coda == NULL) return ERROR_NULL_POINTER;
 
-  return coda->size;
+  return (long long int)coda->size;
 
 }
 
