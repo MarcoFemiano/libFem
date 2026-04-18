@@ -13,4 +13,6 @@ add_executable(libFem
         coda.h
         main.c
         parking.c
-        parking.h)
+        parking.h
+        BST_AVL.c
+        BST_AVL.h)
