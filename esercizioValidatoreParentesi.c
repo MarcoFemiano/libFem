@@ -41,7 +41,7 @@ static char inverti_parentesi(char c) {
 }
 
 
-int main(void) {
+int main3(void) {
 
 
 

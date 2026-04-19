@@ -11,8 +11,9 @@ add_executable(libFem
         esercizioValidatoreParentesi.c
         coda.c
         coda.h
-        main.c
+        mainEsercitazioneParking.c
         parking.c
         parking.h
         BST_AVL.c
-        BST_AVL.h)
+        BST_AVL.h
+        main.c)

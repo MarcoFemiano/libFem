@@ -18,7 +18,8 @@ typedef enum {
     ERROR_ALLOCATION_FAILURE = -4,
     ERROR_EMPTY = -5,
     ERROR_NOT_FOUND = -6,
-    ERROR_INVALID_ARGUMENT = -7
+    ERROR_INVALID_ARGUMENT = -7,
+    NODE_ALREADY_EXISTS = 1,
 }status_codes;
 
 /* Creazione / distruzione */
@@ -26,7 +27,7 @@ status_codes avl_create(size_t sizeOfVals,AVLTree* tree);
 status_codes avl_destroy(AVLTree* tree);
 
 /* Operazioni base */
-status_codes avl_insert(AVLTree tree, void* value);
+status_codes avl_insert(AVLTree tree,int (*cmp)(const void*,const void*), void* value);
 status_codes avl_remove(AVLTree tree, void* value);
 
 status_codes avl_search(AVLTree tree,const void* value,int (*cmp)(const void*,const void*), bool* result);
