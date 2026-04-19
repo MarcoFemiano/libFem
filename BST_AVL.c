@@ -5,6 +5,7 @@
 #include "BST_AVL.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 
@@ -30,6 +31,17 @@ static int max_int(int a, int b) {
         return (a > b) ? a : b;
 }
 
+static Nodo* avl_find_leftmost_node(Nodo* node) {
+        //tests di robustezza
+        if (node == NULL) return NULL;
+        if (*node == NULL) return NULL;
+
+        while ((*node)->leftChild != NULL) {
+                node = &(*node)->leftChild;
+        }
+
+        return node;
+}
 //endregion
 
 status_codes avl_create(size_t sizeOfVals, AVLTree* tree) {
@@ -297,3 +309,149 @@ status_codes avl_insert(AVLTree tree,int (*cmp)(const void*,const void*), void* 
 
 }
 
+
+
+
+static status_codes avl_remove_node(Nodo* node, int (*cmp)(const void*, const void*), void* value) {
+        //tests di robustezza
+        if (node == NULL) return ERROR_NULL_POINTER;
+        if (cmp == NULL) return ERROR_NULL_POINTER;
+        if (value == NULL) return ERROR_NULL_POINTER;
+
+        //base case: nodo non trovato
+        if (*node == NULL) return ERROR_NOT_FOUND;
+
+        status_codes result;
+        int cmpResult = cmp(value, (*node)->val);
+
+        if (cmpResult > 0) {//vado a dx
+                result = avl_remove_node(&(*node)->rightChild, cmp, value);
+                if (result != OK) return result;
+
+                avl_balance_node(node);
+                return OK;
+
+        }else if (cmpResult < 0) {//vado a sx
+                result = avl_remove_node(&(*node)->leftChild, cmp, value);
+                if (result != OK) return result;
+
+                avl_balance_node(node);
+                return OK;
+        }
+
+        //caso in cui il nodo è stato trovato
+
+        //caso non ha figli
+        if ((*node)->leftChild == NULL && (*node)->rightChild == NULL) {
+                free(*node);
+                *node = NULL;
+                return OK;
+        }
+
+        //caso ha solo il figlio sinistro
+        if ((*node)->leftChild != NULL && (*node)->rightChild == NULL) {
+                Nodo nodeToDelete = *node;
+                *node = (*node)->leftChild;
+                free(nodeToDelete);
+                return OK;
+        }
+
+        //caso ha solo il figlio destro
+        if ((*node)->leftChild == NULL && (*node)->rightChild != NULL) {
+                Nodo nodeToDelete = *node;
+                *node = (*node)->rightChild;
+                free(nodeToDelete);
+                return OK;
+        }
+
+        //caso in cui ha entrambi i figli
+        //prendo il successore inorder:
+        //il nodo più a sinistra del sottoalbero destro
+        Nodo* leftmostNode = avl_find_leftmost_node(&(*node)->rightChild);
+        if (leftmostNode == NULL || *leftmostNode == NULL) return ERROR_NOT_FOUND;
+
+        (*node)->val = (*leftmostNode)->val;
+
+        Nodo nodeToDelete = *leftmostNode;
+        *leftmostNode = (*leftmostNode)->rightChild;
+        free(nodeToDelete);
+
+        avl_balance_node(node);
+
+        return OK;
+}
+
+status_codes avl_remove(AVLTree tree, int (*cmp)(const void*, const void*), void* value) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (cmp == NULL) return ERROR_NULL_POINTER;
+        if (value == NULL) return ERROR_NULL_POINTER;
+
+        return avl_remove_node(&tree->root, cmp, value);
+}
+
+
+//region Print ---------------------------------------------------------------
+
+static void avl_print_node(Nodo node, void (*print_value)(const void*), int depth) {
+        //base case
+        if (node == NULL) return;
+
+        avl_print_node(node->rightChild, print_value, depth + 1);
+
+        for (int i = 0; i < depth; i++) {
+                printf("        ");
+        }
+
+        print_value(node->val);
+        printf(" [B=%d|L=%d|R=%d]\n", node->balance, node->leftHeight, node->rightHeight);
+
+        avl_print_node(node->leftChild, print_value, depth + 1);
+}
+
+status_codes avl_print(AVLTree tree, void (*print_value)(const void*)) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (print_value == NULL) return ERROR_NULL_POINTER;
+
+        printf("\n===== AVL TREE =====\n");
+
+        if (tree->root == NULL) {
+                printf("(empty)\n");
+                return OK;
+        }
+
+        avl_print_node(tree->root, print_value, 0);
+
+        return OK;
+}
+
+static void avl_print_inorder_node(Nodo node, void (*print_value)(const void*)) {
+        //base case
+        if (node == NULL) return;
+
+        avl_print_inorder_node(node->leftChild, print_value);
+        print_value(node->val);
+        printf(" ");
+        avl_print_inorder_node(node->rightChild, print_value);
+}
+
+status_codes avl_print_inorder(AVLTree tree, void (*print_value)(const void*)) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (print_value == NULL) return ERROR_NULL_POINTER;
+
+        printf("\n===== AVL INORDER =====\n");
+
+        if (tree->root == NULL) {
+                printf("(empty)\n");
+                return OK;
+        }
+
+        avl_print_inorder_node(tree->root, print_value);
+        printf("\n");
+
+        return OK;
+}
+
+//endregion

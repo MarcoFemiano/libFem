@@ -28,8 +28,7 @@ status_codes avl_destroy(AVLTree* tree);
 
 /* Operazioni base */
 status_codes avl_insert(AVLTree tree,int (*cmp)(const void*,const void*), void* value);
-status_codes avl_remove(AVLTree tree, void* value);
-
+status_codes avl_remove(AVLTree tree,int (*cmp)(const void*, const void*) ,void* value);
 status_codes avl_search(AVLTree tree,const void* value,int (*cmp)(const void*,const void*), bool* result);
 
 /* Info struttura */
@@ -43,7 +42,31 @@ status_codes avl_max(AVLTree tree,void* result);
 
 /* Debug */
 status_codes avl_is_balanced(AVLTree tree, bool* result);
+/**
+ * @brief Stampa l'albero AVL in forma ruotata di 90 gradi.
+ *
+ * La stampa mostra prima il sottoalbero destro, poi il nodo corrente,
+ * poi il sottoalbero sinistro, così da visualizzare la struttura
+ * gerarchica dell'albero nel terminale.
+ *
+ * @param tree albero da stampare
+ * @param print_value funzione callback usata per stampare il valore contenuto in un nodo
+ *
+ * @retval ERROR_NULL_POINTER se tree o print_value sono NULL
+ * @retval OK stampa completata con successo
+ */
+status_codes avl_print(AVLTree tree, void (*print_value)(const void*));
 
+/**
+ * @brief Stampa solo i valori dell'albero in ordine crescente (visita inorder).
+ *
+ * @param tree albero da stampare
+ * @param print_value funzione callback usata per stampare il valore contenuto in un nodo
+ *
+ * @retval ERROR_NULL_POINTER se tree o print_value sono NULL
+ * @retval OK stampa completata con successo
+ */
+status_codes avl_print_inorder(AVLTree tree, void (*print_value)(const void*));
 
 
 #endif //LIBFEM_BST_AVL_H
