@@ -23,7 +23,8 @@ struct strNodo {
 
 struct strAVLTree {
         struct strNodo *root;
-        size_t sizeOfVals;
+        size_t size;
+        int height;
 };
 
 //region helpers
@@ -44,33 +45,20 @@ static Nodo* avl_find_leftmost_node(Nodo* node) {
 }
 //endregion
 
-status_codes avl_create(size_t sizeOfVals, AVLTree* tree) {
+status_codes avl_create(AVLTree* tree) {
         //tests di robustezza
-        if (sizeOfVals == 0) return ERROR_INVALID_ARGUMENT;
+
         if (tree == NULL) return ERROR_NULL_POINTER;
 
         AVLTree temp = malloc(sizeof(struct strAVLTree));
         if (temp == NULL) return ERROR_ALLOCATION_FAILURE;
         *tree = temp;
-        (*tree)->sizeOfVals = sizeOfVals;
         (*tree)->root = NULL;
+        (*tree)->size = 0;
+        (*tree)->height = -1;
         return OK;
 }
-/*
-status_codes temp(AVLTree tree) {
-        if (tree == NULL) return ERROR_ALLOCATION_FAILURE;
 
-        tree = malloc(sizeof(struct strNodo));
-
-
-        (*tree).sizeOfVals = sizeOfVals;
-        (*tree).val = NULL;
-        (*tree).left = NULL;
-        (*tree).right = NULL;
-        (*tree).altezzaSx = 0;
-        (*tree).altezzaDx = 0;
-        (*tree).balance = 0;
-}*/
 
 static void node_destroy(Nodo node) {
         //test di robustezza
@@ -305,7 +293,12 @@ status_codes avl_insert(AVLTree tree,int (*cmp)(const void*,const void*), void* 
         if (value == NULL) return ERROR_NULL_POINTER;
         if (cmp == NULL) return ERROR_NULL_POINTER;
 
-        return avl_insert_node(&(tree->root),cmp,value);
+        status_codes res =  avl_insert_node(&(tree->root),cmp,value);
+
+        if (res != OK) return res;
+
+        tree->size++;
+        return OK;
 
 }
 
@@ -387,7 +380,12 @@ status_codes avl_remove(AVLTree tree, int (*cmp)(const void*, const void*), void
         if (cmp == NULL) return ERROR_NULL_POINTER;
         if (value == NULL) return ERROR_NULL_POINTER;
 
-        return avl_remove_node(&tree->root, cmp, value);
+        status_codes res = avl_remove_node(&tree->root, cmp, value);
+
+        if (res != OK) return res;
+
+        tree->size--;
+        return OK;
 }
 
 
@@ -455,3 +453,153 @@ status_codes avl_print_inorder(AVLTree tree, void (*print_value)(const void*)) {
 }
 
 //endregion
+
+
+
+status_codes avl_is_empty(AVLTree tree, bool* result) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+
+        *result = (bool) (tree->root == NULL);
+        return OK;
+}
+
+
+status_codes avl_size(AVLTree tree,size_t* result) {
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+
+        *result = tree->size;
+        return OK;
+}
+
+static status_codes max_height(const int* sx,const int* dx, int* result) {
+        if (sx == NULL) return ERROR_NULL_POINTER;
+        if (dx == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+
+        if (*sx >= *dx) {
+                *result = *sx;
+                return OK;
+        }else {
+                *result = *dx;
+                return OK;
+        }
+
+        return OK;
+}
+
+status_codes avl_height(AVLTree tree,int* result) {
+        //tests di robustezza
+        if (result == NULL) return ERROR_NULL_POINTER;
+        if (tree == NULL) return ERROR_NULL_POINTER;
+
+        if (tree->root == NULL) {
+                *result = -1;
+                return OK;
+        }
+        status_codes res = max_height(&tree->root->leftHeight, &tree->root->rightHeight, result);
+        if (res != OK) return res;
+        *result +=1 ;
+
+        return OK;
+}
+
+#define LOOKING_FOR_MIN 0
+#define LOOKING_FOR_MAX 1
+
+static status_codes min_max_node(Nodo node, void** result,bool scelta) {
+        if (node == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+
+        if (scelta == LOOKING_FOR_MIN) {
+                //base case
+                if (node->leftChild == NULL) {
+                        *result = node->val;
+                        return OK;
+                }else {
+                        return min_max_node(node->leftChild, result, scelta);
+                }
+
+        }
+
+        if (scelta == LOOKING_FOR_MAX)
+        {
+                //base case
+                if (node->rightChild == NULL) {
+                        *result = node->val;
+                        return OK;
+                }else {
+                        return min_max_node(node->rightChild, result, scelta);
+                }
+        }
+
+        //scelta è diverso da true e false
+        return ERROR_INVALID_ARGUMENT;
+
+}
+
+status_codes avl_min(AVLTree tree,void** result) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+        if (tree->root == NULL) return ERROR_EMPTY_TREE;
+
+       status_codes res = min_max_node(tree->root, result,LOOKING_FOR_MIN);
+        if (res != OK) return res;
+
+        return OK;
+}
+
+status_codes avl_max(AVLTree tree,void** result) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+        if (tree->root == NULL) return ERROR_EMPTY_TREE;
+
+        status_codes res = min_max_node(tree->root, result,LOOKING_FOR_MAX);
+        if (res != OK) return res;
+
+        return OK;
+}
+
+
+static status_codes avl_is_node_balanced(Nodo node, bool* result ) {
+        //test di robustezza
+        if (result == NULL) return ERROR_NULL_POINTER;
+
+        if (node == NULL) return OK;
+        //base case
+        if (abs(node->balance)> 1 ) {
+                *result = false;
+                return OK;
+        }
+
+        status_codes res =  avl_is_node_balanced(node->leftChild,result);
+        if (res != OK || !*result) return res;
+
+        status_codes res2 = avl_is_node_balanced(node->rightChild,result);
+        if (res2 != OK || !*result) return res2;
+
+        return OK;
+}
+
+status_codes avl_is_balanced(AVLTree tree, bool* result) {
+        //tests di robustezza
+        if (tree == NULL) return ERROR_NULL_POINTER;
+        if (result == NULL) return ERROR_NULL_POINTER;
+        *result = true;
+        if (tree->root == NULL) {
+
+                return OK;
+        }
+
+        status_codes res = avl_is_node_balanced(tree->root,result);
+        if (res != OK) return res;
+
+
+
+
+        return OK;
+}
