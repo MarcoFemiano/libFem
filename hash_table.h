@@ -20,12 +20,15 @@ typedef enum {
   ERROR_WRONG_ELEMENTS_SIZE = -5
 }status_codes;
 
+#define HASH_TABLE_INCREMENT_MULTIPLIER 2 //MUST BE >1
+
 typedef struct strHashTable* HashTable;
 
 status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t sizeOfElements);
 
 status_codes hashTable_destroy(HashTable* hashTable);
 
-status_codes hashTable_makeHash(HashTable hashTable, void* value,unsigned long long int* result);
+static status_codes hashTable_makeHash(HashTable hashTable, void* value,unsigned long long int* result);
 
+status_codes hashTable_push(HashTable hashTable, void* value);
 #endif // LIBFEM_HASH_TABLE_H
