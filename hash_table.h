@@ -17,7 +17,8 @@ typedef enum {
   ERROR_ALLOCATION_FAILURE = -2,
   ERROR_REALLOCATION_FAILURE =-3,
   ERROR_ARITHMETIC_OVERFLOW = -4,
-  ERROR_WRONG_ELEMENTS_SIZE = -5
+  ERROR_WRONG_ELEMENTS_SIZE = -5,
+  ERROR_SEARCHING_FOR_ZERO = -6
 }status_codes;
 
 #define HASH_TABLE_INCREMENT_MULTIPLIER 2 //MUST BE >1
@@ -28,7 +29,10 @@ status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t
 
 status_codes hashTable_destroy(HashTable* hashTable);
 
-static status_codes hashTable_makeHash(HashTable hashTable, void* value,unsigned long long int* result);
+status_codes hashTable_makeHash(HashTable hashTable, void* value,unsigned long long int* result);
 
 status_codes hashTable_push(HashTable hashTable, void* value);
+
+status_codes hashTable_search(HashTable hashTable, void* value, bool* result);
+
 #endif // LIBFEM_HASH_TABLE_H

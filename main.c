@@ -6,12 +6,56 @@
 
 #include <stdio.h>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int main() {
   HashTable hashTable;
-  hashTable_create(&hashTable,10,sizeof(int));
-  int e = 8;
-  unsigned long long int hash;
-  hashTable_makeHash(hashTable,&e,&hash);
-  printf("%llu\n",hash);
+  int testSize = 1000000;
+  hashTable_create(&hashTable,testSize*2,sizeof(int));
+  for (int i = 1; i < testSize; i++) {
+
+    if (i%2 == 0) {
+     status_codes res = hashTable_push(hashTable,&i);
+      if (res != OK) printf("errore => %c\n",res);
+    }
+  }
+  int val;
+  do {
+
+    printf("\ninserisci valore da cercare: ");
+    scanf(" %d",&val);
+    bool ris;
+    status_codes res = hashTable_search(hashTable,&val,&ris);
+    if (res != OK) printf("\nerrore => %c\n",res);
+    else {
+      if (ris) printf("\ntrovato");
+      else printf("\nnon trovato");
+    }
+
+
+
+  }while (val != 0);
+
   return 0;
 }
