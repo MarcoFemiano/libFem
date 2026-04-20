@@ -16,4 +16,9 @@ add_executable(libFem
         parking.h
         BST_AVL.c
         BST_AVL.h
+        mainBSTAVL.c
+        hash_table.c
+        hash_table.h
+        third_party/xxHash.h
+        third_party/xxHash.c
         main.c)
