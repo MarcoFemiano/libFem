@@ -16,7 +16,17 @@ struct strHashTable {
   size_t sizeOfelements;
 };
 
-
+/**
+ * @brief Crea e inizializza una nuova hash table.
+ *
+ * Alloca la struttura della tabella, il buffer dati e il vettore degli stati degli slot.
+ * Ogni slot viene inizialmente marcato come libero.
+ *
+ * @param[out] hashTable Puntatore che riceverà la hash table appena creata.
+ * @param[in] defaultCapacity Capacità iniziale desiderata.
+ * @param[in] sizeOfElements Dimensione, in byte, di ogni elemento memorizzato.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
 status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t sizeOfElements) {
   //tests di robustezza
   if (hashTable == NULL) return ERROR_NULL_POINTER;
@@ -57,6 +67,12 @@ status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t
   return OK;
 }
 
+/**
+ * @brief Distrugge una hash table e libera tutta la memoria associata.
+ *
+ * @param[in,out] hashTable Puntatore alla hash table da distruggere.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
 status_codes hashTable_destroy(HashTable* hashTable) {
   //tests di robustezza
   if (hashTable == NULL || *hashTable == NULL || (*hashTable)->data == NULL || (*hashTable)->slotStates == NULL) return ERROR_NULL_POINTER;
@@ -70,6 +86,14 @@ status_codes hashTable_destroy(HashTable* hashTable) {
 }
 
 
+/**
+ * @brief Calcola l'hash di un valore tramite XXH3_64bits.
+ *
+ * @param[in] hashTable Hash table usata per ricavare la dimensione dell'elemento.
+ * @param[in] value Valore di cui calcolare l'hash.
+ * @param[out] result Variabile destinazione dell'hash calcolato.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
  status_codes hashTable_makeHash(HashTable hashTable, void* value,unsigned long long int* result) {
   if (hashTable == NULL || value == NULL || result == NULL) return ERROR_NULL_POINTER;
 
@@ -78,7 +102,17 @@ status_codes hashTable_destroy(HashTable* hashTable) {
 }
 
 
-
+/**
+ * @brief Inserisce un elemento nella hash table senza eseguire resize.
+ *
+ * La funzione gestisce collisioni tramite linear probing e riutilizza i tombstone
+ * quando possibile, continuando comunque la scansione per evitare inserimenti duplicati.
+ *
+ * @param[in] hashTable Hash table di destinazione.
+ * @param[in] cmp Funzione di confronto utente.
+ * @param[in] value Valore da inserire.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
 static status_codes hashTable_pushWithoutResize(HashTable hashTable, int (*cmp)(const void*, const void*), void* value) {
   if (hashTable == NULL || hashTable->data == NULL || hashTable->slotStates == NULL || cmp == NULL || value == NULL) {
     return ERROR_NULL_POINTER;
@@ -180,6 +214,17 @@ static status_codes hashTable_rehash(HashTable hashTable, int (*cmp)(const void*
   return OK;
 }*/
 
+/**
+ * @brief Adatta automaticamente la capacità della hash table.
+ *
+ * Se la tabella è piena, esegue un'espansione. Se il numero di elementi è sceso sotto
+ * una soglia, esegue una riduzione. In entrambi i casi la migrazione degli elementi è
+ * fatta in modo controllato e con rollback in caso di errore.
+ *
+ * @param[in] hashTable Hash table da ridimensionare.
+ * @param[in] cmp Funzione di confronto utente.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
 static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(const void*,const void*)) {
   if (hashTable == NULL || hashTable->data == NULL || hashTable->slotStates == NULL || cmp == NULL) return ERROR_NULL_POINTER;
 
@@ -305,6 +350,14 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
 }
 
 
+/**
+ * @brief Inserisce un elemento nella hash table, eseguendo resize se necessario.
+ *
+ * @param[in] hashTable Hash table di destinazione.
+ * @param[in] cmp Funzione di confronto utente.
+ * @param[in] value Valore da inserire.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
 status_codes hashTable_push(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value) {
   if (hashTable == NULL || value == NULL) return ERROR_NULL_POINTER;
 
@@ -315,6 +368,17 @@ status_codes hashTable_push(HashTable hashTable,int (*cmp)(const void*, const vo
 }
 
 
+/**
+ * @brief Cerca un elemento nella hash table.
+ *
+ * La ricerca usa linear probing e ignora correttamente gli slot marcati come deleted.
+ *
+ * @param[in] hashTable Hash table in cui cercare.
+ * @param[in] cmp Funzione di confronto utente.
+ * @param[in] value Valore da cercare.
+ * @param[out] result Variabile booleana che indica se l'elemento è stato trovato.
+ * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
+ */
 status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value, bool *result) {
   if (hashTable == NULL || value == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || result == NULL || cmp == NULL) {
     return ERROR_NULL_POINTER;
@@ -354,7 +418,18 @@ status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const 
 }
 
 
-
+/**
+ * @brief Rimuove un elemento dalla hash table marcandone lo slot come deleted.
+ *
+ * La funzione non libera fisicamente lo slot, ma lo trasforma in tombstone per non
+ * interrompere le future catene di probing.
+ *
+ * @param[in] hashTable Hash table da cui rimuovere l'elemento.
+ * @param[in] cmp Funzione di confronto utente.
+ * @param[in] value Valore da rimuovere.
+ * @return `OK` se l'elemento è stato rimosso, `ELEMENTO_NON_TROVATO` se non esiste,
+ *         oppure un opportuno codice di errore.
+ */
 status_codes hashTable_remove(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value) {
   if (hashTable == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || cmp == NULL || value == NULL) {
     return ERROR_NULL_POINTER;
