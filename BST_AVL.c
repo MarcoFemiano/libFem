@@ -97,11 +97,11 @@ static status_codes avl_search_node(Nodo node, const void* value, int (*cmp) (co
         if (cmpResult == 0) {
                 *result = true; //trovato
                 return OK;
-        }else if (cmpResult > 0) {//vado a destra
+        }else if (cmpResult == 1) {//vado a destra
                 return avl_search_node(node->rightChild,value,cmp,result);
-        }else{ //vado a sinistra
+        }else if (cmpResult == -1){ //vado a sinistra
                 return avl_search_node(node->leftChild,value,cmp,result);
-        }
+        }else return ERROR_NULL_POINTER;
 }
 
 status_codes avl_search(AVLTree tree,const void* value,int (*cmp)(const void*,const void*), bool* result) {
