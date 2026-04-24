@@ -31,9 +31,10 @@
  *
  * 3) Scrivere una funzione `cmp` che dica quale valore è minore, uguale o maggiore.
  *    La funzione deve restituire:
- *    - un valore < 0 se il primo elemento è minore del secondo
+ *    - -1 se il primo elemento è minore del secondo
  *    - 0 se i due elementi sono uguali
- *    - un valore > 0 se il primo elemento è maggiore del secondo
+ *    - 1 se il primo elemento è maggiore del secondo
+ *    - -2 per segnalare errori nell'esecuzione
  *
  *    Esempio per `int`:
  * @code
