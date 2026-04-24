@@ -431,11 +431,11 @@ status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const 
  *         oppure un opportuno codice di errore.
  */
 status_codes hashTable_remove(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value) {
-  if (hashTable == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || cmp == NULL || value == NULL) {
-    return ERROR_NULL_POINTER;
-  }
+  if (hashTable == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || cmp == NULL || value == NULL) return ERROR_NULL_POINTER;
 
-  status_codes res;
+  status_codes res = hashTable_adjustCapacity(hashTable,cmp);
+  if (res != OK) return res;
+
   size_t tentativi = 0;
   unsigned long long int index = XXH3_64bits(value, hashTable->sizeOfelements);
   index = index % hashTable->capacity;
