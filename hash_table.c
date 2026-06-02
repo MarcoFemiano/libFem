@@ -29,12 +29,12 @@ struct strHashTable {
  */
 status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t sizeOfElements) {
   //tests di robustezza
-  if (hashTable == NULL) return ERROR_NULL_POINTER;
-  if (sizeOfElements == 0) return ERROR_WRONG_ELEMENTS_SIZE;
-  if (defaultCapacity == 0) return ERROR_ALLOCATION_FAILURE;
+  if (hashTable == NULL) return HT_ERROR_NULL_POINTER;
+  if (sizeOfElements == 0) return HT_ERROR_WRONG_ELEMENTS_SIZE;
+  if (defaultCapacity == 0) return HT_ERROR_ALLOCATION_FAILURE;
 
   HashTable newHashTable = malloc (sizeof(struct strHashTable));
-  if (newHashTable == NULL) return ERROR_ALLOCATION_FAILURE;
+  if (newHashTable == NULL) return HT_ERROR_ALLOCATION_FAILURE;
 
   newHashTable->size = 0;
   newHashTable->capacity = defaultCapacity;
@@ -43,14 +43,14 @@ status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t
 
   if (defaultCapacity > SIZE_MAX / sizeOfElements) {
     free(newHashTable);
-    return ERROR_ARITHMETIC_OVERFLOW;
+    return HT_ERROR_ARITHMETIC_OVERFLOW;
   }
 
   newHashTable->data = calloc (newHashTable->capacity, sizeOfElements);
 
   if (newHashTable->data == NULL) {
     free(newHashTable);
-    return ERROR_ALLOCATION_FAILURE;
+    return HT_ERROR_ALLOCATION_FAILURE;
   }
 
 
@@ -59,12 +59,12 @@ status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t
   if (newHashTable->slotStates == NULL) {
     free(newHashTable->data);
     free(newHashTable);
-    return ERROR_ALLOCATION_FAILURE;
+    return HT_ERROR_ALLOCATION_FAILURE;
   }
 
   *hashTable = newHashTable;
 
-  return OK;
+  return HT_OK;
 }
 
 /**
@@ -75,14 +75,14 @@ status_codes hashTable_create(HashTable* hashTable,size_t defaultCapacity,size_t
  */
 status_codes hashTable_destroy(HashTable* hashTable) {
   //tests di robustezza
-  if (hashTable == NULL || *hashTable == NULL || (*hashTable)->data == NULL || (*hashTable)->slotStates == NULL) return ERROR_NULL_POINTER;
+  if (hashTable == NULL || *hashTable == NULL || (*hashTable)->data == NULL || (*hashTable)->slotStates == NULL) return HT_ERROR_NULL_POINTER;
 
   free((*hashTable)->data);
   free((*hashTable)->slotStates);
   free(*hashTable);
   *hashTable = NULL;
 
-  return OK;
+  return HT_OK;
 }
 
 
@@ -95,10 +95,10 @@ status_codes hashTable_destroy(HashTable* hashTable) {
  * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
  */
  status_codes hashTable_makeHash(HashTable hashTable, void* value,unsigned long long int* result) {
-  if (hashTable == NULL || value == NULL || result == NULL) return ERROR_NULL_POINTER;
+  if (hashTable == NULL || value == NULL || result == NULL) return HT_ERROR_NULL_POINTER;
 
   *result = XXH3_64bits(value, hashTable->sizeOfelements);
-  return OK;
+  return HT_OK;
 }
 
 
@@ -115,7 +115,7 @@ status_codes hashTable_destroy(HashTable* hashTable) {
  */
 static status_codes hashTable_pushWithoutResize(HashTable hashTable, int (*cmp)(const void*, const void*), void* value) {
   if (hashTable == NULL || hashTable->data == NULL || hashTable->slotStates == NULL || cmp == NULL || value == NULL) {
-    return ERROR_NULL_POINTER;
+    return HT_ERROR_NULL_POINTER;
   }
 
   size_t tentativi = 0;
@@ -130,10 +130,10 @@ static status_codes hashTable_pushWithoutResize(HashTable hashTable, int (*cmp)(
         memcpy(deletedSlot, value, hashTable->sizeOfelements);
         hashTable->slotStates[firstDeleted] = 1;
         hashTable->size++;
-        return OK;
+        return HT_OK;
       }
 
-      return ERROR_SEMANTIC_BUG_IT_SHOULDNT_HAPPEN;
+      return HT_ERROR_SEMANTIC_BUG_IT_SHOULDNT_HAPPEN;
     }
 
   slot = (unsigned char*)hashTable->data + hashValue * hashTable->sizeOfelements;
@@ -145,7 +145,7 @@ static status_codes hashTable_pushWithoutResize(HashTable hashTable, int (*cmp)(
     memcpy(targetSlot, value, hashTable->sizeOfelements);
     hashTable->slotStates[targetIndex] = 1;
     hashTable->size++;
-    return OK;
+    return HT_OK;
   }
 
   if (hashTable->slotStates[hashValue] == 2) {
@@ -157,8 +157,8 @@ static status_codes hashTable_pushWithoutResize(HashTable hashTable, int (*cmp)(
   }
 
   int res = cmp(slot, value);
-  if (res == 0) return ERROR_VALUE_ALREADY_EXISTS;
-  if (res < -1) return ERROR_NULL_POINTER;
+  if (res == 0) return HT_ERROR_VALUE_ALREADY_EXISTS;
+  if (res < -1) return HT_ERROR_NULL_POINTER;
 
   hashValue = (hashValue + 1) % hashTable->capacity;
   tentativi++;
@@ -226,14 +226,14 @@ static status_codes hashTable_rehash(HashTable hashTable, int (*cmp)(const void*
  * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
  */
 static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(const void*,const void*)) {
-  if (hashTable == NULL || hashTable->data == NULL || hashTable->slotStates == NULL || cmp == NULL) return ERROR_NULL_POINTER;
+  if (hashTable == NULL || hashTable->data == NULL || hashTable->slotStates == NULL || cmp == NULL) return HT_ERROR_NULL_POINTER;
 
   size_t newCapacity = hashTable->capacity;
   // espansione
   if (hashTable->size == hashTable->capacity) {
     newCapacity = hashTable->capacity * HASH_TABLE_INCREMENT_MULTIPLIER;
     if (newCapacity > SIZE_MAX / hashTable->sizeOfelements) {
-      return ERROR_ARITHMETIC_OVERFLOW;
+      return HT_ERROR_ARITHMETIC_OVERFLOW;
     }
 
     // salvo i vecchi buffer
@@ -244,12 +244,12 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
 
     // alloco i nuovi buffer più grandi
     void* newData = calloc(newCapacity, hashTable->sizeOfelements);
-    if (newData == NULL) return ERROR_ALLOCATION_FAILURE;
+    if (newData == NULL) return HT_ERROR_ALLOCATION_FAILURE;
 
     char* newSlotStates = calloc(newCapacity, sizeof(char));
     if (newSlotStates == NULL) {
       free(newData);
-      return ERROR_ALLOCATION_FAILURE;
+      return HT_ERROR_ALLOCATION_FAILURE;
     }
 
     // faccio puntare temporaneamente la hash table ai nuovi buffer
@@ -268,7 +268,7 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
           (unsigned char*)oldData + i * hashTable->sizeOfelements
       );
 
-      if (res2 != OK) {
+      if (res2 != HT_OK) {
         // rollback
         free(newData);
         free(newSlotStates);
@@ -295,7 +295,7 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
 
     // se non cambia davvero nulla, esci
     if (newCapacity == hashTable->capacity) {
-      return OK;
+      return HT_OK;
     }
 
     // salvo i vecchi buffer
@@ -306,12 +306,12 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
 
     // alloco i nuovi buffer più piccoli
     void* newData = calloc(newCapacity, hashTable->sizeOfelements);
-    if (newData == NULL) return ERROR_ALLOCATION_FAILURE;
+    if (newData == NULL) return HT_ERROR_ALLOCATION_FAILURE;
 
     char* newSlotStates = calloc(newCapacity, sizeof(char));
     if (newSlotStates == NULL) {
       free(newData);
-      return ERROR_ALLOCATION_FAILURE;
+      return HT_ERROR_ALLOCATION_FAILURE;
     }
 
     // faccio puntare temporaneamente la hash table ai nuovi buffer
@@ -326,7 +326,7 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
 
       status_codes res2 = hashTable_pushWithoutResize(hashTable,cmp,(unsigned char*)oldData + i * hashTable->sizeOfelements);
 
-      if (res2 != OK) {
+      if (res2 != HT_OK) {
         // rollback
         free(newData);
         free(newSlotStates);
@@ -346,7 +346,7 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
   }
 
 
-  return OK;
+  return HT_OK;
 }
 
 
@@ -359,10 +359,10 @@ static status_codes hashTable_adjustCapacity(HashTable hashTable, int (*cmp)(con
  * @return `OK` in caso di successo, altrimenti un opportuno codice di errore.
  */
 status_codes hashTable_push(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value) {
-  if (hashTable == NULL || value == NULL) return ERROR_NULL_POINTER;
+  if (hashTable == NULL || value == NULL) return HT_ERROR_NULL_POINTER;
 
   status_codes res = hashTable_adjustCapacity(hashTable,cmp);
-  if (res != OK) return res;
+  if (res != HT_OK) return res;
 
   return hashTable_pushWithoutResize(hashTable,cmp ,value);
 }
@@ -381,7 +381,7 @@ status_codes hashTable_push(HashTable hashTable,int (*cmp)(const void*, const vo
  */
 status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value, bool *result) {
   if (hashTable == NULL || value == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || result == NULL || cmp == NULL) {
-    return ERROR_NULL_POINTER;
+    return HT_ERROR_NULL_POINTER;
   }
 
   *result = false;
@@ -392,7 +392,7 @@ status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const 
 
   for (size_t tentativi = 0; tentativi < hashTable->capacity; tentativi++) {
     // se trovo uno slot mai usato, l'elemento non esiste
-    if (hashTable->slotStates[index] == 0) return OK;
+    if (hashTable->slotStates[index] == 0) return HT_OK;
 
     // se è deleted, devo continuare a cercare
     if (hashTable->slotStates[index] == 2) {
@@ -408,13 +408,13 @@ status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const 
 
     if (res == 0) {
       *result = true;
-      return OK;
+      return HT_OK;
     }
 
     index = (index + 1) % hashTable->capacity;
   }
 
-  return OK;
+  return HT_OK;
 }
 
 
@@ -431,10 +431,10 @@ status_codes hashTable_search(HashTable hashTable,int (*cmp)(const void*, const 
  *         oppure un opportuno codice di errore.
  */
 status_codes hashTable_remove(HashTable hashTable,int (*cmp)(const void*, const void*) ,void* value) {
-  if (hashTable == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || cmp == NULL || value == NULL) return ERROR_NULL_POINTER;
+  if (hashTable == NULL || hashTable->slotStates == NULL || hashTable->data == NULL || cmp == NULL || value == NULL) return HT_ERROR_NULL_POINTER;
 
   status_codes res = hashTable_adjustCapacity(hashTable,cmp);
-  if (res != OK) return res;
+  if (res != HT_OK) return res;
 
   size_t tentativi = 0;
   unsigned long long int index = XXH3_64bits(value, hashTable->sizeOfelements);
@@ -443,9 +443,9 @@ status_codes hashTable_remove(HashTable hashTable,int (*cmp)(const void*, const 
 
   LINEAR_PROBING:
 
-  if (tentativi == hashTable->capacity) return ELEMENTO_NON_TROVATO;
+  if (tentativi == hashTable->capacity) return HT_ELEMENTO_NON_TROVATO;
 
-  if (hashTable->slotStates[index] == 0) return ELEMENTO_NON_TROVATO;
+  if (hashTable->slotStates[index] == 0) return HT_ELEMENTO_NON_TROVATO;
 
   if (hashTable->slotStates[index] == 2) {
     index = (index + 1) % hashTable->capacity;
@@ -461,7 +461,7 @@ status_codes hashTable_remove(HashTable hashTable,int (*cmp)(const void*, const 
   if (res == 0) {
     hashTable->slotStates[index] = 2;
     hashTable->size--;
-    return OK;
+    return HT_OK;
   }
 
   index = (index + 1) % hashTable->capacity;
