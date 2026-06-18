@@ -97,13 +97,13 @@ Stack stack_create( size_t capacity, size_t sizeOfEachElement) {
     //Se capacity è 0 voglio uno stack a dimensione dinamica potenzialmente illimitato
     else if (stack->capacity == 0) {
         //test di robustezza
-        if (sizeOfEachElement > SIZE_MAX / DEFAULT_SIZE) {
+        if (sizeOfEachElement > SIZE_MAX / STACK_DEFAULT_SIZE) {
             free(stack);
             return NULL;
         }
-        //inizializzo con DEFAULT_SIZE elementi
-        stack->dati = malloc(DEFAULT_SIZE * sizeOfEachElement);
-        stack->capacity = DEFAULT_SIZE;
+        //inizializzo con STACK_DEFAULT_SIZE elementi
+        stack->dati = malloc(STACK_DEFAULT_SIZE * sizeOfEachElement);
+        stack->capacity = STACK_DEFAULT_SIZE;
 
         if (stack->dati == NULL) {
             free(stack);
@@ -220,12 +220,12 @@ short stack_clear_and_resize_to_default(Stack stack) {
     if (stack == NULL) return ERROR_NULL_POINTER;
     if (!stack->dinamico) return ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE;
 
-    if (stack->sizeOfEachElement > SIZE_MAX / DEFAULT_SIZE) return ERROR_ARITHMETIC_OVERFLOW;
-    void* temp = realloc(stack->dati, DEFAULT_SIZE * stack->sizeOfEachElement);
+    if (stack->sizeOfEachElement > SIZE_MAX / STACK_DEFAULT_SIZE) return ERROR_ARITHMETIC_OVERFLOW;
+    void* temp = realloc(stack->dati, STACK_DEFAULT_SIZE * stack->sizeOfEachElement);
 
     if (temp == NULL) return ERROR_REALLOC_FAIL;
     stack->dati = temp;
-    stack->capacity = DEFAULT_SIZE;
+    stack->capacity = STACK_DEFAULT_SIZE;
 
     stack->size = 0;
 

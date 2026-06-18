@@ -4,11 +4,7 @@
 
 #ifndef LIBFEM_STACK_H
 #define LIBFEM_STACK_H
-#include <stddef.h>
-
-typedef char bool;
-#define true 1
-#define false 0
+#include "libfem_common.h"
 /**
  * @file stack.h
  * @brief Interfaccia pubblica per un ADT Stack generico a memoria contigua.
@@ -41,51 +37,9 @@ typedef char bool;
 typedef struct strStack* Stack;
 
 /**
- * @brief Codice di successo.
- */
-#define OK 0
-
-/**
- * @brief Errore: puntatore allo stack nullo.
- */
-#define ERROR_NULL_POINTER (-1)
-
-/**
- * @brief Errore: stack vuoto.
- */
-#define ERROR_STACK_EMPTY (-2)
-
-/**
- * @brief Errore: stack pieno.
- *
- * Restituito solo nel caso di stack a capacità fissa.
- */
-#define ERROR_STACK_FULL (-3)
-
-/**
- * @brief Errore: puntatore ai dati nullo.
- */
-#define ERROR_NULL_DATA_POINTER (-4)
-
-/**
- * @brief Errore: fallimento di realloc() o impossibilità di espansione.
- */
-#define ERROR_REALLOC_FAIL (-5)
-
-/**
- * @brief Errore: funzione non valida nel caso d'uso corrente.
- */
-#define ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE (-6)
-
-/**
- * @brief Errore: fallimento di realloc() o impossibilità di espansione.
- */
-#define ERROR_ARITHMETIC_OVERFLOW (-7)
-
-/**
  * @brief Dimensione fisica di partenza nel caso venga selezionato uno stack dinamico
  */
-#define DEFAULT_SIZE 10
+#define STACK_DEFAULT_SIZE 10
 
 
 /**
@@ -252,7 +206,7 @@ short stack_is_full(Stack stack);
 
 
 /**
- * @brief Svuota logicamente e fisicamente lo stack impostando la capacità a DEFAULT_SIZE
+ * @brief Svuota logicamente e fisicamente lo stack impostando la capacità a STACK_DEFAULT_SIZE
  *  lo stack SOLO se dinamico.
  *
  *  @warning Se lo stack contiene elementi allocati dinamicamente

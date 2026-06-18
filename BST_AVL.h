@@ -166,15 +166,7 @@
 #ifndef LIBFEM_BST_AVL_H
 #define LIBFEM_BST_AVL_H
 
-#include <stddef.h>
-
-/** @brief Tipo booleano minimale usato dal modulo. */
-typedef char bool;
-
-/** @brief Valore booleano vero. */
-#define true 1
-/** @brief Valore booleano falso. */
-#define false 0
+#include "libfem_common.h"
 
 /**
  * @brief Handle opaco dell'albero AVL.
@@ -191,30 +183,6 @@ typedef struct strAVLTree* AVLTree;
  * resta privata all'implementazione.
  */
 typedef struct strNodo* Nodo;
-
-/**
- * @brief Codici di stato restituiti dalle funzioni dell'ADT.
- */
-typedef enum {
-    /** Operazione completata con successo. */
-    OK = 0,
-    /** Uno o più puntatori obbligatori sono NULL. */
-    ERROR_NULL_POINTER = -1,
-    /** Overflow aritmetico durante un calcolo interno. */
-    ERROR_ARITHMETIC_OVERFLOW = -2,
-    /** Fallimento di una realloc. */
-    ERROR_REALLOC_FAILURE = -3,
-    /** Fallimento di una allocazione dinamica. */
-    ERROR_ALLOCATION_FAILURE = -4,
-    /** Operazione non valida perché l'albero è vuoto. */
-    ERROR_EMPTY_TREE = -5,
-    /** Elemento richiesto non trovato. */
-    ERROR_NOT_FOUND = -6,
-    /** Argomento formalmente valido ma semanticamente non accettabile. */
-    ERROR_INVALID_ARGUMENT = -7,
-    /** Inserimento rifiutato perché il nodo esiste già secondo la `cmp`. */
-    NODE_ALREADY_EXISTS = 1,
-} status_codes;
 
 /**
  * @brief Crea un nuovo albero AVL vuoto.

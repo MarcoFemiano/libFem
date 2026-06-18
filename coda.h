@@ -5,11 +5,7 @@
 #ifndef LIBFEM_CODA_H
 #define LIBFEM_CODA_H
 
-#include <stddef.h>
-
-typedef char bool;
-#define true 1
-#define false 0
+#include "libfem_common.h"
 /**
  * @file coda.h
  * @brief Interfaccia pubblica per un ADT Coda generico a memoria contigua.
@@ -29,7 +25,7 @@ typedef char bool;
  *
  * La modalità viene scelta in fase di creazione:
  * - se capacity > 0, la coda è a capacità fissa
- * - se capacity == 0, la coda è dinamica e viene inizializzata con DEFAULT_SIZE
+ * - se capacity == 0, la coda è dinamica e viene inizializzata con CODA_DEFAULT_SIZE
  *
  * Internamente la coda è implementata come array circolare.
  *
@@ -46,7 +42,7 @@ typedef char bool;
  * Se in coda_create() viene passato capacity == 0, la coda viene creata
  * in modalità dinamica con questa capacità iniziale.
  */
-#define DEFAULT_SIZE 10
+#define CODA_DEFAULT_SIZE 10
 
 /**
  * @brief Tipo opaco che rappresenta una coda generica.
@@ -58,68 +54,11 @@ typedef char bool;
 typedef struct strCoda* Coda;
 
 /**
- * @brief Codice di successo.
- */
-#define OK 0
-
-/**
- * @brief Errore: puntatore nullo.
- *
- * Restituito quando un parametro puntatore richiesto è NULL.
- */
-#define ERROR_NULL_POINTER (-1)
-
-/**
- * @brief Errore: coda vuota.
- *
- * Restituito quando si tenta di leggere o rimuovere un elemento
- * da una coda priva di elementi.
- */
-#define ERROR_CODA_EMPTY (-2)
-
-/**
- * @brief Errore: coda piena.
- *
- * Restituito solo nel caso di coda a capacità fissa quando si tenta
- * di inserire un elemento oltre la capacità massima.
- */
-#define ERROR_CODA_FULL (-3)
-
-/**
- * @brief Errore: puntatore ai dati nullo.
- *
- * Può essere usato da implementazioni che distinguono il caso di
- * puntatore all'ADT nullo dal caso di puntatore ai dati nullo.
- *
- * @note Nella implementazione attuale questo codice non è utilizzato.
- */
-#define ERROR_NULL_DATA_POINTER (-4)
-
-/**
- * @brief Errore: fallimento di riallocazione o impossibilità di espansione.
- *
- * Restituito nel caso di coda dinamica quando l'espansione fallisce
- * oppure quando un controllo di overflow impedisce di allocare
- * ulteriore memoria in sicurezza.
- */
-#define ERROR_REALLOC_FAIL (-5)
-
-/**
- * @brief Errore: funzione non valida nel caso d'uso corrente.
- *
- * Restituito quando una funzione non ha significato per la modalità
- * operativa della coda.
- *
- * Esempio: coda_is_full() su una coda dinamica.
- */
-#define ERROR_FUNCTION_NOT_VALID_IN_THIS_USE_CASE (-6)
-
-/**
  * @brief Crea una nuova coda generica.
  *
  * Se capacity è maggiore di zero, viene creata una coda a capacità fissa.
  * Se capacity è uguale a zero, viene creata una coda dinamica con capacità
- * iniziale pari a DEFAULT_SIZE.
+ * iniziale pari a CODA_DEFAULT_SIZE.
  *
  * Ogni elemento inserito nella coda viene copiato per byte, secondo la
  * dimensione specificata da sizeOfEachElement.

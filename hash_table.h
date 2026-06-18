@@ -87,31 +87,9 @@
 #ifndef LIBFEM_HASH_TABLE_H
 #define LIBFEM_HASH_TABLE_H
 
+#include "libfem_common.h"
 #include "third_party/xxHash.h"
 #include <stdlib.h>
-
-/** @brief Tipo booleano minimale usato dall'API. */
-typedef char bool;
-/** @brief Valore booleano vero. */
-#define true 1
-/** @brief Valore booleano falso. */
-#define false 0
-
-/**
- * @brief Codici di stato restituiti dalle funzioni dell'API.
- */
-typedef enum {
-  HT_OK = 0,
-  HT_ERROR_NULL_POINTER = -1,
-  HT_ERROR_ALLOCATION_FAILURE = -2,
-  HT_ERROR_REALLOCATION_FAILURE = -3,
-  HT_ERROR_ARITHMETIC_OVERFLOW = -4,
-  HT_ERROR_WRONG_ELEMENTS_SIZE = -5,
-  HT_ERROR_SEARCHING_FOR_ZERO = -6,
-  HT_ERROR_VALUE_ALREADY_EXISTS = -7,
-  HT_ERROR_SEMANTIC_BUG_IT_SHOULDNT_HAPPEN = -8,
-  HT_ELEMENTO_NON_TROVATO = 1
-} status_codes;
 
 /**
  * @brief Fattore di crescita/riduzione della capacità.

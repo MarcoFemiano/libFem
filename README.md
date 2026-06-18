@@ -1,137 +1,128 @@
 # libFem
 
-`libFem` e` un progetto in linguaggio C che raccoglie una serie di strutture dati generiche e piccoli programmi dimostrativi a supporto dello studio e della sperimentazione con ADT, algoritmi e gestione della memoria.
+`libFem` e' una libreria C11 di strutture dati classiche scritte come ADT C:
+header pubblici, strutture opache quando possibile, memoria gestita
+esplicitamente e codici di stato documentati.
 
-Il repository include implementazioni di `stack`, `coda`, `AVL tree` e `hash table`, oltre ad alcuni esempi d'uso come un simulatore di parcheggio lineare e una demo interattiva per la hash table.
+## Componenti incluse
 
-## Funzionalita` principali
+| Componente | Modulo principale | Ownership dati |
+| --- | --- | --- |
+| Stack | `stack.h` / `stack.c` | by value |
+| Coda FIFO | `coda.h` / `coda.c` | by value |
+| Hash table | `hash_table.h` / `hash_table.c` | by value |
+| AVL tree | `BST_AVL.h` / `BST_AVL.c` | by pointer |
+| Graph adjacency list | `graph.h` / `graph.c` | memoria interna |
+| LinkedList | `LinkedList.h` / `LinkedList.c` | by pointer |
 
-- `Stack` generico con gestione statica o dinamica degli elementi.
-- `Coda` generica FIFO basata su array circolare.
-- `AVL tree` generico con inserimento, ricerca, rimozione, min, max, altezza e stampa.
-- `Hash table` generica con open addressing, linear probing, tombstone e ridimensionamento automatico.
-- Simulazione di un parcheggio lineare che usa `stack` e `coda`.
-- Esempi e test manuali per verificare il comportamento dei moduli.
+`third_party/xxHash.c` e `third_party/xxHash.h` sono usati dalla hash table.
 
-## Stack tecnologico
+## Header ombrello
 
-- Linguaggio: `C`
-- Standard: `C11`
-- Build system: `CMake`
-- Dipendenze incluse nel repository: `xxHash`
-- Toolchain verificata nella directory di build esistente: `MinGW GCC` su Windows
-
-## Requisiti
-
-- `CMake` 4.0 o superiore
-- Compilatore C compatibile con lo standard `C11`
-- Ambiente locale con supporto alla compilazione da riga di comando oppure IDE compatibile con `CMake`
-- `TODO`: elenco ufficiale dei sistemi operativi supportati
-
-## Installazione
-
-1. Clonare o scaricare il repository in locale.
-   `TODO`: URL ufficiale del repository remoto
-2. Posizionarsi nella cartella del progetto.
-3. Generare la directory di build con `CMake`.
-4. Compilare il target `libFem`.
-
-Esempio:
-
-```bash
-cmake -S . -B build
-cmake --build build
-```
-
-## Installazione solo di ciò che può interessare
-1. Copiare e incollare i file .c e .h dell'API che può essere utile nella cartella dei propri progetti
-2. includerla dove necessario con #include "nomeAPI"
-
-## Avvio locale
-
-Dopo la compilazione, l'eseguibile generato e` `libFem`.
-
-Esempio su Windows:
-
-```powershell
-.\build\libFem.exe
-```
-
-Nota: l'entrypoint attualmente collegato al target principale e` [main.c](./main.c), che avvia una demo interattiva della `hash table`.
-
-## Struttura del progetto
-
-```text
-libFem/
-|-- BST_AVL.c
-|-- BST_AVL.h
-|-- coda.c
-|-- coda.h
-|-- hash_table.c
-|-- hash_table.h
-|-- main.c
-|-- mainBSTAVL.c
-|-- mainEsercitazioneParking.c
-|-- parking.c
-|-- parking.h
-|-- stack.c
-|-- stack.h
-|-- esercizioValidatoreParentesi.c
-|-- third_party/
-|   |-- xxHash.c
-|   `-- xxHash.h
-|-- CMakeLists.txt
-|-- LICENSE
-`-- README.md
-```
-
-### Note sulla struttura
-
-- I moduli principali sono attualmente organizzati direttamente nella root del repository.
-- La cartella `third_party/` contiene la dipendenza esterna `xxHash`.
-- I file `main*.c` raccolgono demo, test manuali e piccoli esercizi.
-- `TODO`: separare in modo piu` netto libreria, esempi e test automatici.
-
-## Esempio d'uso
-
-Esempio minimale di utilizzo della `hash table` generica:
+`libfem.h` include le API pubbliche della libreria:
 
 ```c
-#include <stdio.h>
+#include "libfem.h"
+```
+
+I moduli possono anche essere inclusi singolarmente quando serve un solo ADT.
+
+## Build e test
+
+```powershell
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Nel workspace corrente e' disponibile anche la toolchain CLion configurata:
+
+```powershell
+& 'C:\Program Files\JetBrains\CLion 2025.3.3\bin\cmake\win\x64\bin\cmake.exe' -S . -B cmake-build-debug
+& 'C:\Program Files\JetBrains\CLion 2025.3.3\bin\cmake\win\x64\bin\cmake.exe' --build cmake-build-debug
+& 'C:\Program Files\JetBrains\CLion 2025.3.3\bin\cmake\win\x64\bin\ctest.exe' --test-dir cmake-build-debug --output-on-failure
+```
+
+Il target principale e' la libreria statica `libFem`. I demo storici sono
+target separati esclusi dalla build di default.
+
+## Mini esempi
+
+Stack by value:
+
+```c
+#include "stack.h"
+
+int main(void) {
+  Stack stack = stack_create(2, sizeof(int));
+  int value = 42;
+  int out = 0;
+
+  if (stack == NULL) return 1;
+
+  stack_push(stack, &value);
+  stack_pop(stack, &out);
+  stack_destroy(&stack);
+
+  return out == 42 ? 0 : 1;
+}
+```
+
+Hash table by value:
+
+```c
 #include "hash_table.h"
 
-static int int_cmp(const void *a, const void *b) {
-    if (a == NULL || b == NULL) return -2;
-
-    if (*(const int *)a < *(const int *)b) return -1;
-    if (*(const int *)a > *(const int *)b) return 1;
-    return 0;
+static int int_cmp(const void* a, const void* b) {
+  int x = *(const int*)a;
+  int y = *(const int*)b;
+  if (x < y) return -1;
+  if (x > y) return 1;
+  return 0;
 }
 
 int main(void) {
-    HashTable ht = NULL;
-    bool found = false;
-    int value = 42;
+  HashTable table = NULL;
+  int value = 42;
+  bool found = false;
 
-    if (hashTable_create(&ht, 10, sizeof(int)) != OK) return 1;
-    if (hashTable_push(ht, int_cmp, &value) != OK) return 1;
-    if (hashTable_search(ht, int_cmp, &value, &found) != OK) return 1;
+  if (hashTable_create(&table, 4, sizeof(int)) != HT_OK) return 1;
 
-    if (found) {
-        printf("Valore trovato\n");
-    }
+  hashTable_push(table, int_cmp, &value);
+  hashTable_search(table, int_cmp, &value, &found);
+  hashTable_destroy(&table);
 
-    hashTable_destroy(&ht);
-    return 0;
+  return found ? 0 : 1;
 }
 ```
 
-## Roadmap futura
-- Migliorare la documentazione pubblica dei moduli e dei contratti di ownership della memoria
-- Separare i programmi dimostrativi in target distinti
-- Aggiungere test automatici eseguibili tramite `CMake`
-- Valutare la generazione di una vera libreria riutilizzabile oltre all'eseguibile demo
+LinkedList by pointer:
 
-## Licenza
+```c
+#include "LinkedList.h"
 
-Il progetto e` distribuito con licenza `MIT`. Per il testo completo consultare [LICENSE](./LICENSE).
+int main(void) {
+  LinkedList list = linkedList_create();
+  int value = 42;
+  int* first = NULL;
+
+  if (list == NULL) return 1;
+
+  linkedList_add_tail(list, &value);
+  first = linkedList_search_index(list, 0);
+  linkedList_destroy(&list);
+
+  return first == &value ? 0 : 1;
+}
+```
+
+## Note di ownership
+
+- `stack`, `coda` e `hash_table` copiano i dati by value. Se un elemento
+  contiene puntatori interni, la copia e' superficiale.
+- `BST_AVL` e `LinkedList` salvano puntatori applicativi e non liberano i dati
+  puntati.
+- `graph` possiede solo la propria rappresentazione interna: liste di
+  adiacenza, archi e buffer temporanei allocati dagli algoritmi.
+
+Per dettagli di contesto e invarianti vedere `docs/`.

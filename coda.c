@@ -23,14 +23,14 @@ Coda coda_create(size_t capacity, size_t sizeOfEachElement) {
 
   //tests di robustezza
   if (sizeOfEachElement == 0 ) return NULL;
-  if (capacity == 0 && DEFAULT_SIZE == 0) return NULL;
+  if (capacity == 0 && CODA_DEFAULT_SIZE == 0) return NULL;
 
   Coda coda = malloc(sizeof(struct strCoda));
   if (coda == NULL) return NULL;
 
   coda->dinamica = (char)(capacity == 0);
 
-  if (coda->dinamica) coda->capacity = DEFAULT_SIZE;
+  if (coda->dinamica) coda->capacity = CODA_DEFAULT_SIZE;
   else coda->capacity = capacity;
 
 
