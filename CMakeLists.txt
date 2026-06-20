@@ -11,7 +11,9 @@ add_library(libFem STATIC
         hash_table.c
         graph.c
         LinkedList.c
-        third_party/xxHash.c)
+        third_party/xxHash.c
+        direct_wgraph.c
+        direct_wgraph.h)
 
 target_include_directories(libFem PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR})
