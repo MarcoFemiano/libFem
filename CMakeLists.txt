@@ -12,8 +12,7 @@ add_library(libFem STATIC
         graph.c
         LinkedList.c
         third_party/xxHash.c
-        direct_wgraph.c
-        direct_wgraph.h)
+        main.c)
 
 target_include_directories(libFem PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR})
@@ -22,7 +21,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(libFem PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-add_executable(libFem_demo_hash EXCLUDE_FROM_ALL main.c)
+add_executable(libFem_demo_hash EXCLUDE_FROM_ALL mainHashDaCombaciare.c)
 target_link_libraries(libFem_demo_hash PRIVATE libFem)
 
 add_executable(libFem_demo_parking EXCLUDE_FROM_ALL

@@ -39,7 +39,7 @@
  * @code
  * int int_cmp(const void *a, const void *b) {
  *     const int *x = a;
- *     const int *y = b;
+ *     const int *y = b
  *
  *     if (*x < *y) return -1;
  *     if (*x > *y) return 1;
@@ -166,6 +166,7 @@
 #ifndef LIBFEM_BST_AVL_H
 #define LIBFEM_BST_AVL_H
 
+#include "coda.h"
 #include "libfem_common.h"
 
 /**
@@ -376,5 +377,8 @@ status_codes avl_print(AVLTree tree, void (*print_value)(const void*));
  * @retval OK stampa completata con successo
  */
 status_codes avl_print_inorder(AVLTree tree, void (*print_value)(const void*));
+
+
+status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThreads);
 
 #endif /* LIBFEM_BST_AVL_H */
