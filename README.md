@@ -43,8 +43,10 @@ Nel workspace corrente e' disponibile anche la toolchain CLion configurata:
 & 'C:\Program Files\JetBrains\CLion 2025.3.3\bin\cmake\win\x64\bin\ctest.exe' --test-dir cmake-build-debug --output-on-failure
 ```
 
-Il target principale e' la libreria statica `libFem`. I demo storici sono
-target separati esclusi dalla build di default.
+Il target `libFem` e' l'eseguibile di prova AVL avviabile direttamente da CLion.
+La libreria statica e' costruita dal target CMake `libFem_static` e continua a
+produrre l'archivio `liblibFem.a`. I demo storici sono target separati esclusi
+dalla build di default.
 
 ## Mini esempi
 

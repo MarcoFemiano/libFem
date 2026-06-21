@@ -20,7 +20,7 @@ function(copy_mingw_runtime_dll target_name dll_name)
     endif()
 endfunction()
 
-add_library(libFem STATIC
+add_library(libFem_static STATIC
         stack.c
         coda.c
         BST_AVL.c
@@ -29,34 +29,37 @@ add_library(libFem STATIC
         LinkedList.c
         third_party/xxHash.c)
 
-target_include_directories(libFem PUBLIC
+set_target_properties(libFem_static PROPERTIES
+        OUTPUT_NAME libFem)
+
+target_include_directories(libFem_static PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(libFem PUBLIC Threads::Threads)
+target_link_libraries(libFem_static PUBLIC Threads::Threads)
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(libFem PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(libFem_static PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-add_executable(libFem_demo_avl main.c)
-target_link_libraries(libFem_demo_avl PRIVATE libFem)
-copy_mingw_runtime_dll(libFem_demo_avl libwinpthread-1.dll)
+add_executable(libFem main.c)
+target_link_libraries(libFem PRIVATE libFem_static)
+copy_mingw_runtime_dll(libFem libwinpthread-1.dll)
 
 add_executable(libFem_demo_hash EXCLUDE_FROM_ALL mainHashDaCombaciare.c)
-target_link_libraries(libFem_demo_hash PRIVATE libFem)
+target_link_libraries(libFem_demo_hash PRIVATE libFem_static)
 copy_mingw_runtime_dll(libFem_demo_hash libwinpthread-1.dll)
 
 add_executable(libFem_demo_parking EXCLUDE_FROM_ALL
         mainEsercitazioneParking.c
         parking.c)
-target_link_libraries(libFem_demo_parking PRIVATE libFem)
+target_link_libraries(libFem_demo_parking PRIVATE libFem_static)
 copy_mingw_runtime_dll(libFem_demo_parking libwinpthread-1.dll)
 
 enable_testing()
 
 function(add_libfem_test test_name source_file)
     add_executable(${test_name} ${source_file})
-    target_link_libraries(${test_name} PRIVATE libFem)
+    target_link_libraries(${test_name} PRIVATE libFem_static)
     copy_mingw_runtime_dll(${test_name} libwinpthread-1.dll)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()

@@ -378,7 +378,7 @@ status_codes avl_print(AVLTree tree, void (*print_value)(const void*));
  */
 status_codes avl_print_inorder(AVLTree tree, void (*print_value)(const void*));
 
-
-status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThreads);
+//LIBERARE LA CODA è RESPONSABILITà DELL'UTILIZZATORE. LA FUNZIONE NON LA LIBERERà NEMMENO IN CASO DI ERRORE
+status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThreads, Coda output);
 
 #endif /* LIBFEM_BST_AVL_H */

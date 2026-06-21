@@ -34,8 +34,11 @@ struct strAVLTree {
 typedef struct strThreadAttraversalArgs {
         Coda coda;
         Nodo node;
+        pthread_mutex_t *mutex;
 }ThreadAttraversalArgs;
 //endregion
+
+
 
 
 //region private prototypes
@@ -276,21 +279,17 @@ status_codes avl_is_balanced(AVLTree tree, bool* result) {
 
 
 
-status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThreads) {
+status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThreads,Coda output) {
         //tests di robustezza
-        if (tree == NULL || tree->root == NULL) return ERROR_NULL_POINTER;
+        if (tree == NULL || tree->root == NULL || output == NULL) return ERROR_NULL_POINTER;
         if (numThreads <2) return ERROR_INVALID_ARGUMENT;
 
-        Coda coda = coda_create(0,sizeof(struct strNodo));
-        if (coda == NULL) return ERROR_ALLOCATION_FAILURE;
-
         ThreadAttraversalArgs arg;
-        arg.coda = coda;
+        arg.coda = output;
         arg.node = tree->root;
 
         int* cont = malloc(sizeof(int));
         if (cont == NULL) {
-                free(coda);
                 return ERROR_ALLOCATION_FAILURE;
         }
         *cont = 0;
@@ -298,44 +297,42 @@ status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThread
         pthread_t* threads = calloc(numThreads,sizeof(pthread_t));
         if (threads == NULL) {
                 free(cont);
-                free(coda);
                 return ERROR_ALLOCATION_FAILURE;
         }
 
         ThreadAttraversalArgs* args = calloc(numThreads,sizeof(ThreadAttraversalArgs));
         if (args == NULL) {
                 free(cont);
-                free(coda);
                 free(threads);
                 return ERROR_ALLOCATION_FAILURE;
         }
 
-        avl_DFS_Father_attraversalMultiThread(tree->root,coda,numThreads,cont,&threads,args);
+        pthread_mutex_t *mutex = malloc(sizeof(pthread_mutex_t));
+        if (mutex == NULL) {
+                free(cont);
+                free(threads);
+                free(args);
+                return ERROR_ALLOCATION_FAILURE;
+        }
+        pthread_mutex_init(mutex,NULL);
+        for (unsigned int i = 0; i< numThreads;i++) args[i].mutex = mutex;
+
+        avl_DFS_Father_attraversalMultiThread(tree->root,output,numThreads,cont,&threads,args);
 
         int *num = malloc(sizeof(int));
         if (num == NULL) {
                 free(cont);
-                free(coda);
                 free(threads);
+                free(args);
                 return ERROR_ALLOCATION_FAILURE;
         }
-        *num = 0;
-        printf("stampo l'attraversamento\n");
-        while (coda_pop(coda,num) == OK ) {
-                printf("[%d] ",*num);
-        }
-        printf("\n");
 
-
-
-
-        for (unsigned int i = 0; i<numThreads;i++) {
+        for (unsigned int i = 0; i<(unsigned int) *cont;i++) {
                 pthread_join(threads[i],NULL);
         }
 
 
         free(cont);
-        free(coda);
         free(threads);
         free(num);
         free(args);
@@ -744,17 +741,19 @@ static status_codes avl_search_node(Nodo node, const void* value, int (*cmp) (co
 
 
 static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned int numT, int* cont, pthread_t** thread, ThreadAttraversalArgs* arg) {
+
         //caso base
         if (node == NULL) return;
-        //MANCA LA GESTIONE DELL'ERRORE SU QUESTA MALLOC
+        //il padre usa un mutex di uno dei figli
+        pthread_mutex_lock(arg[0].mutex);
+        coda_push(coda,node->val);
+        pthread_mutex_unlock(arg[0].mutex);
 
         //ricorsione
-        if (numT <(unsigned int) *cont) {
-
-
+        if ((unsigned int) *cont < numT ) {
                 arg[*cont].node = node->leftChild;
                 arg[*cont].coda = coda;
-                pthread_create(thread[*cont],NULL,avl_DFS_Thread_attraversalMultiThread,&arg[*cont]);
+                pthread_create(&(*thread)[*cont],NULL,avl_DFS_Thread_attraversalMultiThread,&arg[*cont]);
                 (*cont)++;
         }else {
                 avl_DFS_Father_attraversalMultiThread(node->leftChild,coda,numT,cont,thread,arg);
@@ -762,9 +761,9 @@ static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned 
 
         avl_DFS_Father_attraversalMultiThread(node->rightChild,coda,numT,cont,thread,arg);
 
-        for (unsigned int i = 0; i < numT; i++) {
-                pthread_join((*thread)[i],NULL);
-        }
+       // for (unsigned int i = 0; i < numT; i++) {
+       //         pthread_join((*thread)[i],NULL);
+      //  }
 
 
 
@@ -772,22 +771,25 @@ static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned 
 
 static void* avl_DFS_Thread_attraversalMultiThread(void* arg) {
 
-        ThreadAttraversalArgs *targ = (ThreadAttraversalArgs *)arg;
 
+        ThreadAttraversalArgs *targ = (ThreadAttraversalArgs *)arg;
+        Nodo node = targ->node;
         //caso Base
         if (targ->node== NULL) return NULL;
 
         //visita
-        coda_push(targ->coda,targ->node);
+        pthread_mutex_lock(targ->mutex);
+        coda_push(targ->coda,targ->node->val);
+        pthread_mutex_unlock(targ->mutex);
 
         //ricorsione
-        if (targ->node->leftChild != NULL) {
-                targ->node = targ->node->leftChild;
+        if (node->leftChild != NULL) {
+                targ->node = node->leftChild;
                 avl_DFS_Thread_attraversalMultiThread(targ);
         }
 
-        if (targ->node->rightChild != NULL){
-                targ->node = targ->node->rightChild;
+        if (node->rightChild != NULL){
+                targ->node = node->rightChild;
                 avl_DFS_Thread_attraversalMultiThread(targ);
         }
 

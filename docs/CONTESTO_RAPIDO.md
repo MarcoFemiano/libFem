@@ -1,11 +1,12 @@
 # Contesto rapido libFem
 
-Il progetto espone una libreria statica C11 chiamata `libFem`.
+Il progetto espone una libreria statica C11 e un main di prova avviabile da CLion.
 
 ## Struttura
 
-- Moduli pubblici compilati nel target `libFem`: `stack`, `coda`, `BST_AVL`,
+- Moduli pubblici compilati nel target CMake `libFem_static`: `stack`, `coda`, `BST_AVL`,
   `hash_table`, `graph`, `LinkedList`.
+- Target CMake `libFem`: eseguibile di prova AVL basato su `main.c`.
 - Dipendenza vendorizzata: `third_party/xxHash.*`, usata dalla hash table.
 - Header ombrello: `libfem.h`, che include tutti i moduli pubblici correnti.
 - `tests/` contiene solo test CTest per i moduli ancora presenti e per
@@ -13,9 +14,11 @@ Il progetto espone una libreria statica C11 chiamata `libFem`.
 
 ## Build
 
-`CMakeLists.txt` crea il target statico `libFem`, registra CTest e crea
-`libFem_demo_avl` come eseguibile di default per il main di prova AVL. I demo
-storici restano target separati esclusi dalla build di default.
+`CMakeLists.txt` crea il target statico interno `libFem_static`, che produce
+ancora l'archivio `liblibFem.a`, registra CTest e crea `libFem` come eseguibile
+di default per il main di prova AVL. Questo evita che CLion provi a eseguire
+direttamente la libreria statica. I demo storici restano target separati esclusi
+dalla build di default.
 
 Con MinGW, i target eseguibili copiano `libwinpthread-1.dll` accanto al binario
 quando la DLL e' disponibile nella stessa cartella del compilatore. Questo serve
