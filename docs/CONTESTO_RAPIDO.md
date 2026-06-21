@@ -13,8 +13,13 @@ Il progetto espone una libreria statica C11 chiamata `libFem`.
 
 ## Build
 
-`CMakeLists.txt` crea il target statico `libFem`, registra CTest e lascia i demo
-storici come target separati esclusi dalla build di default.
+`CMakeLists.txt` crea il target statico `libFem`, registra CTest e crea
+`libFem_demo_avl` come eseguibile di default per il main di prova AVL. I demo
+storici restano target separati esclusi dalla build di default.
+
+Con MinGW, i target eseguibili copiano `libwinpthread-1.dll` accanto al binario
+quando la DLL e' disponibile nella stessa cartella del compilatore. Questo serve
+per eseguire i target AVL anche se la cartella `bin` di MinGW non e' nel `PATH`.
 
 La toolchain verificata in questo workspace e' quella di CLion:
 

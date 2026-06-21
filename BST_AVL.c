@@ -53,7 +53,7 @@ static void avl_print_inorder_node(Nodo node, void (*print_value)(const void*));
 static status_codes max_height(const int* sx,const int* dx, int* result);
 static status_codes min_max_node(Nodo node, void** result,bool scelta);
 static void* avl_DFS_Thread_attraversalMultiThread(void* arg);
-static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned int numT, int* cont, pthread_t** thread);
+static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned int numT, int* cont, pthread_t** thread, ThreadAttraversalArgs* arg);
 
 //endregion
 
@@ -302,7 +302,15 @@ status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThread
                 return ERROR_ALLOCATION_FAILURE;
         }
 
-        avl_DFS_Father_attraversalMultiThread(tree->root,coda,numThreads,cont,&threads);
+        ThreadAttraversalArgs* args = calloc(numThreads,sizeof(ThreadAttraversalArgs));
+        if (args == NULL) {
+                free(cont);
+                free(coda);
+                free(threads);
+                return ERROR_ALLOCATION_FAILURE;
+        }
+
+        avl_DFS_Father_attraversalMultiThread(tree->root,coda,numThreads,cont,&threads,args);
 
         int *num = malloc(sizeof(int));
         if (num == NULL) {
@@ -325,11 +333,12 @@ status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThread
                 pthread_join(threads[i],NULL);
         }
 
-        
+
         free(cont);
         free(coda);
         free(threads);
         free(num);
+        free(args);
 
 
 
@@ -734,24 +743,29 @@ static status_codes avl_search_node(Nodo node, const void* value, int (*cmp) (co
 
 
 
-static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned int numT, int* cont, pthread_t** thread) {
+static void avl_DFS_Father_attraversalMultiThread(Nodo node,Coda coda, unsigned int numT, int* cont, pthread_t** thread, ThreadAttraversalArgs* arg) {
         //caso base
         if (node == NULL) return;
         //MANCA LA GESTIONE DELL'ERRORE SU QUESTA MALLOC
 
         //ricorsione
-        if (numT < *cont) {
+        if (numT <(unsigned int) *cont) {
 
-                ThreadAttraversalArgs* arg = malloc(sizeof( struct strThreadAttraversalArgs));
-                arg->node = node->leftChild;
-                arg->coda = coda;
-                pthread_create(thread[*cont],NULL,avl_DFS_Thread_attraversalMultiThread,arg);
+
+                arg[*cont].node = node->leftChild;
+                arg[*cont].coda = coda;
+                pthread_create(thread[*cont],NULL,avl_DFS_Thread_attraversalMultiThread,&arg[*cont]);
                 (*cont)++;
         }else {
-                avl_DFS_Father_attraversalMultiThread(node->leftChild,coda,numT,cont,thread);
+                avl_DFS_Father_attraversalMultiThread(node->leftChild,coda,numT,cont,thread,arg);
         }
 
-        avl_DFS_Father_attraversalMultiThread(node->rightChild,coda,numT,cont,thread);
+        avl_DFS_Father_attraversalMultiThread(node->rightChild,coda,numT,cont,thread,arg);
+
+        for (unsigned int i = 0; i < numT; i++) {
+                pthread_join((*thread)[i],NULL);
+        }
+
 
 
 }

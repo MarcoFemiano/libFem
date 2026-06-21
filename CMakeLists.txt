@@ -4,6 +4,22 @@ project(libFem C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+find_package(Threads REQUIRED)
+
+function(copy_mingw_runtime_dll target_name dll_name)
+    if (MINGW)
+        get_filename_component(MINGW_COMPILER_DIR "${CMAKE_C_COMPILER}" DIRECTORY)
+        set(MINGW_RUNTIME_DLL "${MINGW_COMPILER_DIR}/${dll_name}")
+
+        if (EXISTS "${MINGW_RUNTIME_DLL}")
+            add_custom_command(TARGET ${target_name} POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${MINGW_RUNTIME_DLL}"
+                    "$<TARGET_FILE_DIR:${target_name}>/${dll_name}")
+        endif()
+    endif()
+endfunction()
+
 add_library(libFem STATIC
         stack.c
         coda.c
@@ -11,29 +27,37 @@ add_library(libFem STATIC
         hash_table.c
         graph.c
         LinkedList.c
-        third_party/xxHash.c
-        main.c)
+        third_party/xxHash.c)
 
 target_include_directories(libFem PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(libFem PUBLIC Threads::Threads)
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(libFem PRIVATE -Wall -Wextra -pedantic)
 endif()
 
+add_executable(libFem_demo_avl main.c)
+target_link_libraries(libFem_demo_avl PRIVATE libFem)
+copy_mingw_runtime_dll(libFem_demo_avl libwinpthread-1.dll)
+
 add_executable(libFem_demo_hash EXCLUDE_FROM_ALL mainHashDaCombaciare.c)
 target_link_libraries(libFem_demo_hash PRIVATE libFem)
+copy_mingw_runtime_dll(libFem_demo_hash libwinpthread-1.dll)
 
 add_executable(libFem_demo_parking EXCLUDE_FROM_ALL
         mainEsercitazioneParking.c
         parking.c)
 target_link_libraries(libFem_demo_parking PRIVATE libFem)
+copy_mingw_runtime_dll(libFem_demo_parking libwinpthread-1.dll)
 
 enable_testing()
 
 function(add_libfem_test test_name source_file)
     add_executable(${test_name} ${source_file})
     target_link_libraries(${test_name} PRIVATE libFem)
+    copy_mingw_runtime_dll(${test_name} libwinpthread-1.dll)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 
