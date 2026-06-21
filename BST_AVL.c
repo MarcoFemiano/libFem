@@ -318,14 +318,20 @@ status_codes avl_DFS_attraversalMultiThread(AVLTree tree, unsigned int numThread
         }
         printf("\n");
 
+
+
+
+        for (unsigned int i = 0; i<numThreads;i++) {
+                pthread_join(threads[i],NULL);
+        }
+
+        
         free(cont);
         free(coda);
         free(threads);
         free(num);
 
-        for (unsigned int i = 0; i<numThreads;i++) {
-                pthread_join(threads[i],NULL);
-        }
+
 
         return OK;
 }
