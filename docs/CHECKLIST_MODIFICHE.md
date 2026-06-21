@@ -12,5 +12,8 @@ Prima di chiudere una modifica:
 - Aggiornare Doxygen nell'header quando cambia il contratto pubblico.
 - Aggiornare `README.md` e `docs/WORKLOG_LIBFEM.md` se cambia l'elenco API.
 - Aggiungere o aggiornare il test CTest del modulo.
+- Per funzioni concorrenti, testare thread count invalidi, output condiviso,
+  ripetizioni stress e casi in cui la struttura di output non accetta tutti gli
+  elementi.
 - Verificare che nessun include locale punti a file assenti.
 - Eseguire build e CTest.
